@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Profile | InvestySignals</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        
+        
+        
+        
+        .dash-container {
+            padding: 100px 24px 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .profile-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 32px;
+        }
+        
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .menu-item {
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        .menu-item:hover {
+            background: var(--surface);
+            color: var(--text);
+        }
+        .menu-item.active {
+            background: rgba(245, 200, 66, 0.1);
+            color: var(--gold);
+            border: 1px solid rgba(245, 200, 66, 0.2);
+        }
+        
+        .tab-content {
+            display: none;
+            background: var(--bg2);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius);
+            padding: 32px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        
+        .content-header {
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-soft);
+        }
+        .content-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+        .content-desc {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .input-control {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border-soft);
+            color: var(--text);
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-family: 'Space Grotesk', sans-serif;
+            transition: var(--transition);
+            outline: none;
+        }
+        .input-control:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 2px var(--gold-glow);
+        }
+        .input-control:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        textarea.input-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .pw-strength {
+            height: 4px;
+            background: var(--surface);
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+            display: flex;
+        }
+        .pw-strength-bar { height: 100%; width: 0; transition: all 0.3s ease; }
+        .weak { background: var(--red); width: 33.33%; }
+        .medium { background: var(--gold); width: 66.66%; }
+        .strong { background: var(--green); width: 100%; }
+        
+        .chips-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .chip {
+            padding: 6px 12px;
+            background: var(--surface);
+            border: 1px solid var(--border-soft);
+            border-radius: 100px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .chip.selected {
+            background: var(--gold);
+            color: var(--bg);
+            border-color: var(--gold);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+        }
+        .stat-label { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 8px; }
+        .stat-val { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 700; }
+        
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--surface2);
+            border: 1px solid var(--gold);
+            padding: 12px 24px;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .profile-layout { grid-template-columns: 1fr; }
+            .sidebar-menu { flex-direction: row; overflow-x: auto; padding-bottom: 8px; }
+            .menu-item { white-space: nowrap; }
+            .stats-grid { grid-template-columns: 1fr; }
+            
+            .tab-content { padding: 24px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+        <div class="nav-backdrop" id="navBackdrop"></div>
+    <nav class="auth-nav">
+        <div class="auth-nav-left">
+            <button class="auth-hamburger" id="authHamburger">☰</button>
+            <a href="index.html" class="logo">
+                <span class="logo-icon">◈</span> INVESTY<span class="logo-accent">SIGNALS</span>
+            </a>
+        </div>
+        <div class="auth-nav-menu" id="authNavMenu">
+            <a href="dashboard.html" class="auth-nav-link">📊 Dashboard</a>
+            <a href="analysis.html" class="auth-nav-link">🧠 Analysis</a>
+            <a href="live-signals.html" class="auth-nav-link">📝 Paper Trading</a>
+            <a href="profile.html" class="auth-nav-link active">👤 Profile</a>
+            <a class="auth-nav-link" style="color:var(--red,#ff4d4f);cursor:pointer;" id="sidebarLogout">🔓 Log Out</a>
+        </div>
+        <div class="auth-nav-right">
+            <div class="user-chip-wrap" id="userChipWrap">
+                <div class="user-chip" id="userChipBtn" style="cursor:pointer;display:flex;">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <div class="user-name" id="userName" style="display:block;">User</div>
+                    <span style="font-size:0.65rem;color:var(--text-muted);margin-left:2px;">▾</span>
+                </div>
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="profile.html" class="ud-item">👤 Profile</a>
+                    <div style="height:1px;background:var(--border-soft);margin:4px 0;"></div>
+                    <a class="ud-item ud-danger" id="dropdownLogout">🔓 Log Out</a>
+                </div>
+            </div>
+            <button id="logoutBtn" class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.875rem;">Logout</button>
+        </div>
+    </nav>
+
+    <div class="dash-container">
+        <div class="profile-layout">
+            
+            <div class="sidebar-menu">
+                <!-- User info card at top of sidebar -->
+                <div style="padding:16px 12px 20px;border-bottom:1px solid var(--border-soft);margin-bottom:8px;">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                        <div id="profileAvatarBig" style="width:44px;height:44px;border-radius:50%;background:var(--gold);color:#000;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:800;flex-shrink:0;">U</div>
+                        <div style="min-width:0;">
+                            <div id="profileNameDisplay" style="font-weight:700;font-size:0.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
+                            <div id="profileEmailDisplay" style="font-size:0.75rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <span id="profilePlanBadge" class="badge badge-outline" style="font-size:0.7rem;">Free</span>
+                        <a href="upgrade.html" class="badge badge-gold" style="font-size:0.7rem;text-decoration:none;cursor:pointer;">⬆ Upgrade</a>
+                    </div>
+                </div>
+                <div class="menu-item active" data-target="tab-info">Account Info</div>
+                <div class="menu-item" data-target="tab-security">Security</div>
+                <div class="menu-item" data-target="tab-stats">Statistics</div>
+            </div>
+
+            <div class="content-area">
+                
+                <!-- Tab 1: Account Info -->
+                <div class="tab-content active" id="tab-info">
+                    <div class="content-header">
+                        <h2 class="content-title">Account Information</h2>
+                        <p class="content-desc">Update your personal details and public profile.</p>
+                    </div>
+                    
+                    <form id="infoForm">
+                        <div class="input-group">
+                            <label>Display Name</label>
+                            <input type="text" id="displayName" class="input-control">
+                        </div>
+                        <div class="input-group">
+                            <label>Email Address</label>
+                            <input type="email" id="email" class="input-control" disabled>
+                            <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">Email cannot be changed.</div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="input-group">
+                                <label>Country</label>
+                                <input type="text" class="input-control" placeholder="e.g. Sri Lanka">
+                            </div>
+                            <div class="input-group">
+                                <label>Timezone</label>
+                                <select class="input-control">
+                                    <option value="Asia/Colombo">Asia/Colombo (UTC+5:30)</option>
+                                    <option value="UTC">UTC</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Bio</label>
+                            <textarea class="input-control" placeholder="A short bio about yourself"></textarea>
+                        </div>
+                        
+                        <div style="color: var(--text-dim); font-size: 0.875rem; margin-bottom: 24px;" id="joinDate">Joined: ...</div>
+                        
+                        <button type="submit" class="btn btn-gold">Save Changes</button>
+                    </form>
+                </div>
+
+                <!-- Tab 2: Security -->
+                <div class="tab-content" id="tab-security">
+                    <div class="content-header">
+                        <h2 class="content-title">Security</h2>
+                        <p class="content-desc">Manage your password and account security.</p>
+                    </div>
+                    
+                    <form id="securityForm">
+                        <div class="input-group">
+                            <label>Current Password</label>
+                            <input type="password" class="input-control" required>
+                        </div>
+                        <div class="input-group">
+                            <label>New Password</label>
+                            <input type="password" id="newPw" class="input-control" required>
+                            <div class="pw-strength"><div id="pwBar" class="pw-strength-bar"></div></div>
+                        </div>
+                        <div class="input-group">
+                            <label>Confirm New Password</label>
+                            <input type="password" class="input-control" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-gold">Update Password</button>
+                    </form>
+                </div>
+
+                <!-- Tab 4: Stats -->
+                <div class="tab-content" id="tab-stats">
+                    <div class="content-header">
+                        <h2 class="content-title">Statistics</h2>
+                        <p class="content-desc">Your paper trading performance.</p>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">Total Trades</div>
+                            <div class="stat-val" id="statTrades">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Win Rate</div>
+                            <div class="stat-val" id="statWinRate" style="color: var(--text-muted);">—</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Best Trade</div>
+                            <div class="stat-val" id="statBest" style="color: var(--text-muted);">—</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Worst Trade</div>
+                            <div class="stat-val" id="statWorst" style="color: var(--text-muted);">—</div>
+                        </div>
+                        <div class="stat-card" style="grid-column: span 2;">
+                            <div class="stat-label">Total P&L</div>
+                            <div class="stat-val" id="statPL" style="color: var(--text-muted);">$0.00</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 24px; padding: 16px; background: var(--surface); border-radius: var(--radius-sm); font-size: 0.875rem; color: var(--text-muted); text-align: center;">
+                        📋 Complete your first paper trade on the <a href="live-signals.html" style="color: var(--gold);">Paper Trading</a> page to see statistics here.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast">
+        <span style="color: var(--gold);">✅</span> Settings saved successfully.
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+        const auth = getAuth(initializeApp({
+            apiKey:"AIzaSyA49TYbX5omoN56bffDnlqZGGjjpKZtOvk",
+            authDomain:"investysignals-890ba.firebaseapp.com", projectId:"investysignals-890ba",
+            storageBucket:"investysignals-890ba.firebasestorage.app", messagingSenderId:"1045281522975",
+            appId:"1:1045281522975:web:47c4b8d32c5f235a7bdc2a"
+        }));
+
+        window.handleSignOut = async () => { try { await signOut(auth); } catch(e) {} window.location.href = 'index.html'; };
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = 'login.html'; return; }
+            try {
+                // FIX: send Bearer token so server can verify identity and promote admin
+                const idToken = await user.getIdToken();
+                const sr = await fetch('/api/user/status', {
+                  headers: { 'Authorization': 'Bearer ' + idToken }
+                });
+                const sj = await sr.json();
+                if (sj.success && (sj.status.maintenance || sj.status.suspended)) { window.location.href = 'dashboard.html'; return; }
+            } catch(_) {}
+
+            const name = user.displayName || user.email?.split('@')[0] || 'Trader';
+            const ini  = name.charAt(0).toUpperCase();
+            document.getElementById('userAvatar').textContent = ini;
+            document.getElementById('userName').textContent = name;
+            document.getElementById('displayName').value = name;
+            document.getElementById('email').value = user.email || '';
+            // Populate sidebar profile card
+            const bigAv = document.getElementById('profileAvatarBig'); if(bigAv) bigAv.textContent = ini;
+            const nd = document.getElementById('profileNameDisplay');  if(nd) nd.textContent = name;
+            const ed = document.getElementById('profileEmailDisplay'); if(ed) ed.textContent = user.email || '';
+            const joined = user.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : 'Recently';
+            document.getElementById('joinDate').textContent = `Joined: ${joined}`;
+
+            // Load plan from server
+            try {
+                const tok = await user.getIdToken();
+                const sj  = await fetch('/api/user/status', { headers: { 'Authorization': 'Bearer ' + tok } }).then(r=>r.json());
+                if (sj.success) {
+                    const pl = sj.status.plan || 'free';
+                    const pb = document.getElementById('profilePlanBadge');
+                    if (pb) { pb.textContent = pl.charAt(0).toUpperCase() + pl.slice(1); pb.className = pl === 'elite' ? 'badge badge-purple' : pl === 'pro' ? 'badge badge-gold' : 'badge badge-outline'; }
+                }
+            } catch(_) {}
+
+            document.getElementById('logoutBtn').addEventListener('click', () =>
+                signOut(auth).then(() => window.location.href = 'index.html')
+            );
+        });
+
+        // Tabs logic
+        const menuItems = document.querySelectorAll('.menu-item');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                // Remove active from all
+                menuItems.forEach(mi => mi.classList.remove('active'));
+                tabContents.forEach(tc => tc.classList.remove('active'));
+                
+                // Add active to clicked
+                item.classList.add('active');
+                const target = document.getElementById(item.getAttribute('data-target'));
+                target.classList.add('active');
+            });
+        });
+
+        // Chips logic
+        document.querySelectorAll('.chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                chip.classList.toggle('selected');
+            });
+        });
+
+        // Password strength
+        const newPw = document.getElementById('newPw');
+        const pwBar = document.getElementById('pwBar');
+        newPw.addEventListener('input', () => {
+            const val = newPw.value;
+            let strength = 0;
+            if(val.length > 5) strength++;
+            if(val.length > 7 && /[A-Z]/.test(val) && /[0-9]/.test(val)) strength++;
+            if(val.length > 9 && /[^A-Za-z0-9]/.test(val)) strength++;
+
+            pwBar.className = 'pw-strength-bar';
+            if(val.length > 0) {
+                if(strength === 1) pwBar.classList.add('weak');
+                else if(strength === 2) pwBar.classList.add('medium');
+                else if(strength === 3) pwBar.classList.add('strong');
+            }
+        });
+
+        // Form submits (Mock)
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        }
+
+        document.getElementById('infoForm').addEventListener('submit', (e) => { e.preventDefault(); showToast(); });
+        document.getElementById('securityForm').addEventListener('submit', (e) => { e.preventDefault(); showToast(); e.target.reset(); pwBar.className='pw-strength-bar'; });
+        document.getElementById('prefsForm').addEventListener('submit', (e) => { e.preventDefault(); showToast(); });
+    </script>
+
+    <script>
+        // FIX: removed duplicate logoutBtn handler that used firebase 10.8.1 (conflicts with 11.6.0 above)
+
+                const authHamburger = document.getElementById('authHamburger');
+        const authNavMenu = document.getElementById('authNavMenu');
+        const navBackdrop = document.getElementById('navBackdrop');
+        
+        function closeNavMenu() {
+            if (authNavMenu) authNavMenu.classList.remove('open'); if(document.getElementById('navBackdrop')) document.getElementById('navBackdrop').style.pointerEvents='none';
+            if (navBackdrop) navBackdrop.classList.remove('open');
+        }
+        
+        if (authHamburger) {
+            authHamburger.addEventListener('click', () => {
+                const isOpen = authNavMenu.classList.toggle('open');
+                if (navBackdrop) navBackdrop.classList.toggle('open', isOpen);
+            });
+        }
+        if (navBackdrop) {
+            navBackdrop.addEventListener('click', closeNavMenu);
+        }
+        document.querySelectorAll('.auth-nav-link').forEach(link => {
+            link.addEventListener('click', closeNavMenu);
+        });
+    
+        /* ── User dropdown ── */
+        const _chip  = document.getElementById('userChipBtn');
+        const _ddrop = document.getElementById('userDropdown');
+        if (_chip && _ddrop) {
+            _chip.addEventListener('click', e => { e.stopPropagation(); _ddrop.classList.toggle('open'); });
+            document.addEventListener('click', () => _ddrop.classList.remove('open'));
+        }
+        const _slo3 = document.getElementById('sidebarLogout');
+        if (_slo3) _slo3.addEventListener('click', () => { if(typeof window.handleSignOut==='function') window.handleSignOut(); else window.location.href='index.html'; });
+        const _dlogout = document.getElementById('dropdownLogout');
+        if (_dlogout) _dlogout.addEventListener('click', async () => {
+            if (typeof window.handleSignOut === 'function') await window.handleSignOut();
+            else window.location.href = 'index.html';
+        });
+</script>
+
+</body>
+</html>

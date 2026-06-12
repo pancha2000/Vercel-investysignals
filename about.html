@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>About Us | InvestySignals</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .page-hero {
+            padding: 160px 24px 80px;
+            text-align: center;
+            background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
+            border-bottom: 1px solid var(--border-soft);
+        }
+
+        .page-hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 16px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .page-hero p {
+            color: var(--text-muted);
+            font-size: 1.125rem;
+            max-width: 700px;
+            margin: 0 auto;
+
+        }
+
+        .stats-bar {
+            background: var(--surface2);
+            border-top: 1px solid var(--border-soft);
+            border-bottom: 1px solid var(--border-soft);
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .sb-item {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: var(--gold);
+        }
+
+        .section-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 100px 24px;
+        }
+
+        .mission-text {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            color: var(--text-muted);
+            margin-bottom: 60px;
+            text-align: center;
+        }
+
+        .mission-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 100px;
+        }
+
+        .mission-card {
+            background: var(--bg2);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius);
+            padding: 32px 24px;
+            text-align: center;
+        }
+
+        .mc-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+
+        .mc-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+        }
+
+        .tech-section {
+            background: var(--bg2);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius);
+            padding: 60px 40px;
+            margin-bottom: 100px;
+        }
+
+        .tech-title {
+            text-align: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+
+        .tech-desc {
+            text-align: center;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+
+        .ind-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .ind-card {
+            background: var(--surface);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .steps-wrapper {
+            margin-bottom: 100px;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            text-align: center;
+        }
+
+        .step-num {
+            width: 48px;
+            height: 48px;
+            background: rgba(245, 200, 66, 0.1);
+            color: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin: 0 auto 16px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .step-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 80px 24px;
+            background: linear-gradient(135deg, var(--bg2) 0%, rgba(245, 200, 66, 0.1) 100%);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .mission-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .ind-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .steps-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .tech-section {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+<!-- Google AdSense Auto Ads -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5034247623532581"
+     crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">◈</span>
+                INVESTY<span class="logo-accent">SIGNALS</span>
+            </a>
+            <div class="nav-links">
+                <a href="signals.html">Signals</a>
+                <a href="about.html" class="active">About</a>
+                <a href="pricing.html">Pricing</a>
+                <a href="contact.html">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <a href="login.html" class="btn btn-ghost">Log In</a>
+                <a href="register.html" class="btn btn-gold">Get Started →</a>
+            </div>
+            <button class="hamburger" id="hamburger">☰</button>
+        </div>
+    </nav>
+    <div class="mobile-drawer" id="mobileDrawer">
+        <button class="drawer-close" id="drawerClose">×</button>
+        <div class="drawer-nav">
+            <a href="signals.html">Signals</a>
+            <a href="about.html">About</a>
+            <a href="pricing.html">Pricing</a>
+            <a href="contact.html">Contact</a>
+        </div>
+        <div class="drawer-actions">
+            <a href="login.html" class="btn btn-ghost" style="width: 100%;">Log In</a>
+            <a href="register.html" class="btn btn-gold" style="width: 100%;">Get Started →</a>
+        </div>
+    </div>
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+
+    <div class="page-hero">
+        <h1>We help traders make smarter decisions with data</h1>
+        <p>InvestySignals uses 25-factor technical analysis to identify high-probability trading setups on Binance
+            Futures — completely free.</p>
+    </div>
+
+    <div class="stats-bar">
+        <div class="sb-item">8 Technical Indicators</div>
+        <div class="sb-item">100+ Coins Tracked</div>
+        <div class="sb-item">24/7 Live Market Data</div>
+        <div class="sb-item">Free Always</div>
+    </div>
+
+    <div class="section-container">
+
+        <h2 style="text-align: center; font-family: 'Space Grotesk', sans-serif; font-size: 2.5rem; margin-bottom: 24px;">Why we
+            built InvestySignals</h2>
+        <div class="mission-text">
+            Most crypto signal services charge expensive subscriptions for information that should be freely available
+            to everyone. We built InvestySignals to give every trader — beginner or experienced — access to the same
+            quality of technical analysis that professional traders use. Our platform combines multiple proven
+            indicators into a single confluence score, giving you a clear, unbiased view of market opportunities without
+            the noise.
+        </div>
+
+        <div class="mission-cards fade-up">
+            <div class="mission-card">
+                <div class="mc-icon">🎁</div>
+                <div class="mc-title">Free Forever</div>
+                <div style="color: var(--text-muted); font-size: 0.9rem;">Core signals and analysis will never be
+                    paywalled.</div>
+            </div>
+            <div class="mission-card">
+                <div class="mc-icon">📊</div>
+                <div class="mc-title">Data-Driven</div>
+                <div style="color: var(--text-muted); font-size: 0.9rem;">No emotions, no guessing. Pure technical
+                    analysis.</div>
+            </div>
+            <div class="mission-card">
+                <div class="mc-icon">🎓</div>
+                <div class="mc-title">Educational</div>
+                <div style="color: var(--text-muted); font-size: 0.9rem;">Learn how indicators work together while you
+                    trade.</div>
+            </div>
+        </div>
+
+        <div class="tech-section fade-up">
+            <h2 class="tech-title">8-Factor Confluence Engine</h2>
+            <p class="tech-desc">Instead of relying on a single indicator, our analysis engine scores each trading
+                opportunity across 25 independent factors. Only setups where multiple indicators agree get a high
+                confidence score.</p>
+
+            <div class="ind-grid">
+                <div class="ind-card">RSI</div>
+                <div class="ind-card">EMA</div>
+                <div class="ind-card">MACD</div>
+                <div class="ind-card">Bollinger Bands</div>
+                <div class="ind-card">Stoch RSI</div>
+                <div class="ind-card">ADX</div>
+                <div class="ind-card">OBV</div>
+                <div class="ind-card">Volume</div>
+            </div>
+        </div>
+
+        <div class="steps-wrapper fade-up">
+            <h2 style="text-align: center; font-family: 'Space Grotesk', sans-serif; font-size: 2rem; margin-bottom: 40px;">How
+                It Works</h2>
+            <div class="steps-grid">
+                <div>
+                    <div class="step-num">1</div>
+                    <div class="step-title">Live Data from Binance</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">We process real-time tick data for over
+                        100 futures pairs.</div>
+                </div>
+                <div>
+                    <div class="step-num">2</div>
+                    <div class="step-title">8-Factor Scoring</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">The engine evaluates each pair across all
+                        indicators instantly.</div>
+                </div>
+                <div>
+                    <div class="step-num">3</div>
+                    <div class="step-title">Signal Generated</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">High-probability setups are delivered with
+                        exact SL/TP levels.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cta-section fade-up">
+            <h2 style="font-size: 2.5rem; margin-bottom: 16px;">Start Trading Smarter Today</h2>
+            <p
+                style="color: var(--text-muted); margin-bottom: 32px; max-width: 500px; margin-left: auto; margin-right: auto;">
+                Join our community and get access to institutional-grade trading tools.</p>
+            <a href="register.html" class="btn btn-gold" style="font-size: 1.125rem; padding: 16px 32px;">Create Free
+                Account</a>
+        </div>
+
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col" style="grid-column: span 1;">
+                    <a href="index.html" class="logo mb-2">
+                        <span class="logo-icon">◈</span> INVESTY<span class="logo-accent">SIGNALS</span>
+                    </a>
+                    <p style="color: var(--text-muted); font-size: 0.875rem;">Sri Lanka's leading crypto signal
+                        platform. Empowering retail traders with institutional-grade tools.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Platform</h4>
+                    <ul class="footer-links">
+                        <li><a href="signals.html">Live Signals</a></li>
+                        <li><a href="login.html">Analysis Engine</a></li>
+                        <li><a href="login.html">Paper Trading</a></li>
+                        <li><a href="login.html">Dashboard</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <ul class="footer-links">
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="pricing.html">Pricing</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="terms.html">Terms of Service</a></li>
+                        <li><a href="privacy.html">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div>© 2026 InvestySignals. All rights reserved.</div>
+                <div>Educational purposes only. Not financial advice.</div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const hamburger = document.getElementById('hamburger');
+        const drawerClose = document.getElementById('drawerClose');
+        const mobileDrawer = document.getElementById('mobileDrawer');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+
+        function toggleDrawer() {
+            mobileDrawer.classList.toggle('open');
+            drawerOverlay.classList.toggle('open');
+        }
+
+        hamburger.addEventListener('click', toggleDrawer);
+        drawerClose.addEventListener('click', toggleDrawer);
+        drawerOverlay.addEventListener('click', toggleDrawer);
+
+        // Scroll reveal
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('visible');
+                    io.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-up').forEach(el => io.observe(el));
+    </script>
+</body>
+
+</html>

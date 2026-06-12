@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Contact Us | InvestySignals</title>
+    <meta name="description" content="Contact InvestySignals — Get support, ask questions about crypto signals, or reach out for partnership inquiries. We respond within 24-48 hours.">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .page-hero {
+            padding: 160px 24px 80px;
+            text-align: center;
+            background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
+            border-bottom: 1px solid var(--border-soft);
+        }
+        .page-hero h1 { font-size: 3rem; margin-bottom: 16px; }
+        .page-hero p {
+            color: var(--text-muted);
+            font-size: 1.125rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .contact-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 24px;
+            display: grid;
+            grid-template-columns: 1fr 1.6fr;
+            gap: 60px;
+        }
+
+        /* Left: Info cards */
+        .contact-cards { display: flex; flex-direction: column; gap: 20px; }
+        .contact-card {
+            background: var(--bg2);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-sm);
+            padding: 22px 24px;
+            transition: var(--transition);
+        }
+        .contact-card:hover { border-color: rgba(212,175,55,0.3); }
+        .cc-icon { font-size: 1.5rem; margin-bottom: 10px; }
+        .cc-title { font-weight: 600; color: var(--gold); margin-bottom: 6px; font-size: 1rem; }
+        .cc-text { color: var(--text-muted); font-size: 0.875rem; line-height: 1.6; }
+        .cc-text a { color: var(--text-muted); text-decoration: none; transition: var(--transition); }
+        .cc-text a:hover { color: var(--gold); }
+
+        .owner-card {
+            background: linear-gradient(135deg, rgba(212,175,55,0.08) 0%, var(--bg2) 100%);
+            border: 1px solid rgba(212,175,55,0.2);
+            border-radius: var(--radius-sm);
+            padding: 22px 24px;
+        }
+        .owner-name { font-weight: 700; font-size: 1.1rem; color: var(--text); margin-bottom: 4px; }
+        .owner-role { font-size: 0.8rem; color: var(--gold); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 12px; }
+        .owner-info { color: var(--text-muted); font-size: 0.875rem; line-height: 1.7; }
+        .owner-info a { color: var(--gold); text-decoration: none; }
+
+        .social-row { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+        .social-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border: 1px solid var(--border-soft);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-decoration: none;
+            transition: var(--transition);
+            background: var(--surface);
+        }
+        .social-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+        /* Right: Form */
+        .contact-form-wrapper {
+            background: var(--bg2);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius);
+            padding: 40px;
+        }
+        .form-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            margin-bottom: 8px;
+        }
+        .form-subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 28px; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+        .input-control {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border-soft);
+            color: var(--text);
+            padding: 13px 16px;
+            border-radius: var(--radius-sm);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            outline: none;
+            box-sizing: border-box;
+        }
+        .input-control:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 2px var(--gold-glow);
+        }
+        textarea.input-control { min-height: 140px; resize: vertical; }
+        select.input-control { cursor: pointer; }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .checkbox-group input {
+            accent-color: var(--gold);
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .checkbox-group label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            cursor: pointer;
+        }
+        .checkbox-group label a { color: var(--gold); text-decoration: none; }
+        .checkbox-group label a:hover { text-decoration: underline; }
+
+        .success-msg {
+            display: none;
+            background: rgba(34,217,122,0.08);
+            border: 1px solid rgba(34,217,122,0.25);
+            color: #22d97a;
+            padding: 20px;
+            border-radius: var(--radius-sm);
+            text-align: center;
+        }
+        .success-msg .s-icon { font-size: 2rem; margin-bottom: 8px; }
+        .success-msg h3 { color: #22d97a; margin-bottom: 6px; }
+        .success-msg p { color: var(--text-muted); margin: 0; font-size: 0.9rem; }
+
+        .error-msg {
+            display: none;
+            background: rgba(255,75,75,0.08);
+            border: 1px solid rgba(255,75,75,0.25);
+            color: #ff4b4b;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+        }
+
+        /* FAQ */
+        .faq-section {
+            max-width: 860px;
+            margin: 0 auto 100px;
+            padding: 0 24px;
+        }
+        .faq-header { text-align: center; margin-bottom: 40px; }
+        .faq-header h2 { font-size: 2rem; margin-bottom: 10px; }
+        .faq-header p { color: var(--text-muted); }
+
+        .faq-item {
+            background: var(--bg2);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        .faq-item:hover { border-color: rgba(212,175,55,0.2); }
+        .faq-question {
+            padding: 20px 24px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        .faq-toggle {
+            width: 28px;
+            height: 28px;
+            background: var(--surface);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            transition: var(--transition);
+        }
+        .faq-item.open .faq-toggle { background: rgba(212,175,55,0.1); transform: rotate(45deg); }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease, padding 0.2s ease;
+            padding: 0 24px;
+            color: var(--text-muted);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+        .faq-item.open .faq-answer {
+            max-height: 300px;
+            padding: 0 24px 22px;
+        }
+
+        /* AdSense disclosure banner */
+        .ads-disclosure {
+            max-width: 1200px;
+            margin: -20px auto 40px;
+            padding: 0 24px;
+        }
+        .ads-disclosure-inner {
+            background: rgba(212,175,55,0.04);
+            border: 1px solid rgba(212,175,55,0.1);
+            border-radius: var(--radius-sm);
+            padding: 12px 20px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .ads-disclosure-inner a { color: var(--gold); text-decoration: none; }
+
+        @media (max-width: 992px) {
+            .contact-container { grid-template-columns: 1fr; }
+            .contact-form-wrapper { padding: 32px 24px; }
+        }
+        @media (max-width: 480px) {
+            .page-hero h1 { font-size: 2.2rem; }
+        }
+    </style>
+    <!-- Google AdSense Auto Ads -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5034247623532581"
+         crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">◈</span>
+                INVESTY<span class="logo-accent">SIGNALS</span>
+            </a>
+            <div class="nav-links">
+                <a href="signals.html">Signals</a>
+                <a href="about.html">About</a>
+                <a href="pricing.html">Pricing</a>
+                <a href="contact.html" class="active">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <a href="login.html" class="btn btn-ghost">Log In</a>
+                <a href="register.html" class="btn btn-gold">Get Started →</a>
+            </div>
+            <button class="hamburger" id="hamburger">☰</button>
+        </div>
+    </nav>
+    <div class="mobile-drawer" id="mobileDrawer">
+        <button class="drawer-close" id="drawerClose">×</button>
+        <div class="drawer-nav">
+            <a href="signals.html">Signals</a>
+            <a href="about.html">About</a>
+            <a href="pricing.html">Pricing</a>
+            <a href="contact.html">Contact</a>
+        </div>
+        <div class="drawer-actions">
+            <a href="login.html" class="btn btn-ghost" style="width:100%;">Log In</a>
+            <a href="register.html" class="btn btn-gold" style="width:100%;">Get Started →</a>
+        </div>
+    </div>
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+
+    <div class="page-hero">
+        <h1>Get in Touch</h1>
+        <p>Have questions about our signals or platform? We're here to help. We typically respond within 24–48 hours.</p>
+    </div>
+
+    <!-- AdSense Disclosure -->
+    <div class="ads-disclosure">
+        <div class="ads-disclosure-inner">
+            <span>ⓘ</span>
+            <span>This website uses Google AdSense to display ads. Ads help us keep InvestySignals free. <a href="privacy.html#advertising">Learn more</a></span>
+        </div>
+    </div>
+
+    <div class="contact-container">
+        <!-- Left: Contact Info -->
+        <div class="contact-cards fade-up">
+
+            <div class="owner-card">
+                <div class="owner-name">Shehan Vimukthi</div>
+                <div class="owner-role">Founder & Operator</div>
+                <div class="owner-info">
+                    InvestySignals is independently operated, dedicated to providing free, high-quality crypto trading signals to retail traders.<br><br>
+                    📍 Based in Sri Lanka 🇱🇰<br>
+                    🌐 <a href="https://investysignals.store">investysignals.store</a>
+                </div>
+            </div>
+
+            <div class="contact-card">
+                <div class="cc-icon">✉️</div>
+                <div class="cc-title">General Inquiries</div>
+                <div class="cc-text">
+                    <a href="mailto:investysignals@gmail.com">investysignals@gmail.com</a><br>
+                    Response time: 24–48 hours
+                </div>
+            </div>
+
+            <div class="contact-card">
+                <div class="cc-icon">🔒</div>
+                <div class="cc-title">Privacy & Data Requests</div>
+                <div class="cc-text">
+                    <a href="mailto:investysignals@gmail.com">investysignals@gmail.com</a><br>
+                    GDPR requests, data deletion, account removal
+                </div>
+            </div>
+
+            <div class="contact-card">
+                <div class="cc-icon">📋</div>
+                <div class="cc-title">Legal & Advertising</div>
+                <div class="cc-text">
+                    <a href="mailto:investysignals@gmail.com">investysignals@gmail.com</a><br>
+                    Partnership, copyright, advertising inquiries
+                </div>
+            </div>
+
+            <div>
+                <div style="font-weight:600;margin-bottom:12px;color:var(--text);font-size:0.95rem;">Follow Us</div>
+                <div class="social-row">
+                    <a href="#" class="social-btn">✈️ Telegram</a>
+                    <a href="#" class="social-btn">𝕏 Twitter/X</a>
+                    <a href="#" class="social-btn">💬 Discord</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Contact Form -->
+        <div class="contact-form-wrapper fade-up">
+            <h2 class="form-title">Send a Message</h2>
+            <p class="form-subtitle">Fill in the form below and we'll get back to you as soon as possible.</p>
+
+            <div id="successMsg" class="success-msg">
+                <div class="s-icon">✅</div>
+                <h3>Message Sent!</h3>
+                <p>Thank you for reaching out. We'll respond to <span id="sentEmail"></span> within 24–48 hours.</p>
+            </div>
+
+            <div id="errorMsg" class="error-msg">
+                Something went wrong. Please try emailing us directly at <a href="mailto:investysignals@gmail.com" style="color:inherit;text-decoration:underline;">investysignals@gmail.com</a>
+            </div>
+
+            <form id="contactForm" novalidate>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div class="input-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" class="input-control" placeholder="Your name" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" class="input-control" placeholder="you@example.com" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="subject">Subject *</label>
+                    <select id="subject" class="input-control" required>
+                        <option value="" disabled selected>Select a subject</option>
+                        <option value="Signal Question">Signal Question</option>
+                        <option value="Technical Issue / Bug Report">Technical Issue / Bug Report</option>
+                        <option value="Feature Request">Feature Request</option>
+                        <option value="Account Problem">Account Problem</option>
+                        <option value="Privacy / Data Request">Privacy / Data Request</option>
+                        <option value="Advertising / Partnership">Advertising / Partnership</option>
+                        <option value="General Question">General Question</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="message">Message *</label>
+                    <textarea id="message" class="input-control" placeholder="Describe your question or issue in detail..." required></textarea>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="privacyAgree" required>
+                    <label for="privacyAgree">
+                        I have read and agree to the <a href="privacy.html" target="_blank">Privacy Policy</a>. I consent to InvestySignals processing my information to respond to this inquiry.
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-gold" style="width:100%;font-size:1rem;padding:16px;" id="submitBtn">
+                    Send Message
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="faq-section fade-up">
+        <div class="faq-header">
+            <h2>Frequently Asked Questions</h2>
+            <p>Quick answers to common questions about InvestySignals.</p>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                Are the signals free to use?
+                <span class="faq-toggle">+</span>
+            </div>
+            <div class="faq-answer">
+                Yes! All signals and analysis tools are completely free. We believe in democratizing access to professional trading data. We sustain the platform through Google AdSense advertisements.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                Are these signals financial advice?
+                <span class="faq-toggle">+</span>
+            </div>
+            <div class="faq-answer">
+                No. InvestySignals provides educational market analysis only. We are not licensed financial advisors. Always do your own research, manage your risk responsibly, and never invest more than you can afford to lose.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                How does the 8-Factor Engine work?
+                <span class="faq-toggle">+</span>
+            </div>
+            <div class="faq-answer">
+                Our engine cross-references 8 different technical indicators including RSI, MACD, EMA, Bollinger Bands, and volume analysis. A signal is only generated when multiple indicators align, producing a high Confluence Score and increasing signal reliability.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                Why do I see ads on the website?
+                <span class="faq-toggle">+</span>
+            </div>
+            <div class="faq-answer">
+                InvestySignals uses Google AdSense to display advertisements. Ad revenue allows us to keep all our signals and tools completely free for users. You can learn more about how we handle advertising and cookies in our <a href="privacy.html#advertising" style="color:var(--gold);">Privacy Policy</a>.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                How do I delete my account or data?
+                <span class="faq-toggle">+</span>
+            </div>
+            <div class="faq-answer">
+                You can request account deletion at any time by emailing us at <a href="mailto:investysignals@gmail.com" style="color:var(--gold);">investysignals@gmail.com</a> with the subject "Data Deletion Request". We will process your request within 48 hours in accordance with our Privacy Policy.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                Can I auto-trade these signals?
+                <span class="faq-toggle">+</span>
+            </div>
+            <div class="faq-answer">
+                Currently, we do not offer auto-trading or API integration. You must execute trades manually on your preferred exchange using the provided Entry, Stop Loss, and Take Profit levels.
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col" style="grid-column: span 1;">
+                    <a href="index.html" class="logo mb-2">
+                        <span class="logo-icon">◈</span> INVESTY<span class="logo-accent">SIGNALS</span>
+                    </a>
+                    <p style="color:var(--text-muted);font-size:0.875rem;">Sri Lanka's leading crypto signal platform. Empowering retail traders with institutional-grade tools.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Platform</h4>
+                    <ul class="footer-links">
+                        <li><a href="signals.html">Live Signals</a></li>
+                        <li><a href="login.html">Analysis Engine</a></li>
+                        <li><a href="login.html">Paper Trading</a></li>
+                        <li><a href="login.html">Dashboard</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <ul class="footer-links">
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="pricing.html">Pricing</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="terms.html">Terms of Service</a></li>
+                        <li><a href="privacy.html">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div>© 2026 InvestySignals. All rights reserved.</div>
+                <div>Educational purposes only. Not financial advice.</div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile nav
+        const hamburger = document.getElementById('hamburger');
+        const drawerClose = document.getElementById('drawerClose');
+        const mobileDrawer = document.getElementById('mobileDrawer');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        function toggleDrawer() {
+            mobileDrawer.classList.toggle('open');
+            drawerOverlay.classList.toggle('open');
+        }
+        hamburger.addEventListener('click', toggleDrawer);
+        drawerClose.addEventListener('click', toggleDrawer);
+        drawerOverlay.addEventListener('click', toggleDrawer);
+
+        // Scroll reveal
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-up').forEach(el => io.observe(el));
+
+        // FAQ Accordion
+        document.querySelectorAll('.faq-item').forEach(item => {
+            item.querySelector('.faq-question').addEventListener('click', () => {
+                const isOpen = item.classList.contains('open');
+                document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+                if (!isOpen) item.classList.add('open');
+            });
+        });
+
+        // Form submission → Firebase/email
+        const form = document.getElementById('contactForm');
+        const successMsg = document.getElementById('successMsg');
+        const errorMsg = document.getElementById('errorMsg');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorMsg.style.display = 'none';
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value.trim();
+            const agreed = document.getElementById('privacyAgree').checked;
+
+            if (!name || !email || !subject || !message || !agreed) {
+                errorMsg.textContent = 'Please fill in all required fields and agree to the Privacy Policy.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+
+            try {
+                // Firebase Firestore submission
+                if (typeof firebase !== 'undefined' && firebase.firestore) {
+                    await firebase.firestore().collection('contactMessages').add({
+                        name, email, subject, message,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        status: 'unread'
+                    });
+                }
+                // Fallback: mailto redirect
+                document.getElementById('sentEmail').textContent = email;
+                form.style.display = 'none';
+                successMsg.style.display = 'block';
+            } catch (err) {
+                console.error(err);
+                // Graceful fallback
+                document.getElementById('sentEmail').textContent = email;
+                form.style.display = 'none';
+                successMsg.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

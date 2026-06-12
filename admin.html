@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Admin Panel | InvestySignals</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+    /* ── Reset touch issues ── */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    /* Remove overflow:hidden from body (causes iOS touch bugs on fixed elements) */
+    html { overflow-x: hidden; }
+    body { overflow-x: hidden; overflow-y: auto; }
+
+    /* body::after grid overlay must never block touch */
+    body::after {
+        pointer-events: none !important;
+        z-index: 0 !important;
+    }
+
+    /* Tap highlight for all interactive elements */
+    button, a, input, select, textarea, label,
+    .menu-item, .btn, [onclick] {
+        -webkit-tap-highlight-color: rgba(240,180,41,0.15);
+        touch-action: manipulation;
+        cursor: pointer;
+    }
+
+    /* ── Admin Layout ── */
+    .admin-wrapper {
+        display: flex;
+        min-height: 100vh;
+        padding-top: 64px;
+    }
+
+    /* ── Sidebar ── */
+    .admin-sidebar {
+        width: 240px;
+        background: var(--bg2);
+        border-right: 1px solid var(--border-soft);
+        position: fixed;
+        top: 64px; bottom: 0; left: 0;
+        overflow-y: auto;
+        padding: 16px 12px;
+        transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+        z-index: 300;
+    }
+    .sidebar-section {
+        font-size: 0.65rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.12em;
+        color: var(--text-dim); padding: 16px 12px 6px;
+    }
+    .menu-item {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 12px; border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-size: 0.88rem; font-weight: 500;
+        color: var(--text-muted); margin-bottom: 2px;
+        border: none; background: none; width: 100%;
+        text-align: left; font-family: 'Space Grotesk', sans-serif;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(240,180,41,0.15);
+    }
+    .menu-item:hover, .menu-item.active {
+        background: var(--surface);
+        color: var(--text);
+    }
+    .menu-item.active { color: var(--gold); }
+
+    /* ── Main Content — NO z-index, NO position:relative ── */
+    .admin-main {
+        flex: 1;
+        margin-left: 240px;
+        padding: 28px 28px 48px;
+        min-height: calc(100vh - 64px);
+        /* NO position, NO z-index — prevents stacking context that blocks iOS touch */
+    }
+
+    /* ── Content Sections ── */
+    .content-section { display: none; }
+    .content-section.active {
+        display: block;
+        animation: slideIn 0.3s ease;
+    }
+
+    /* ── Admin Banner ── */
+    .admin-banner {
+        background: linear-gradient(135deg, rgba(255,61,90,0.08) 0%, rgba(10,14,26,0) 60%);
+        border: 1px solid rgba(255,61,90,0.2);
+        border-radius: var(--radius);
+        padding: 24px 28px;
+        margin-bottom: 28px;
+        position: relative;
+        overflow: hidden;
+    }
+    .admin-banner::after {
+        content: ''; position: absolute; inset: 0;
+        background: radial-gradient(ellipse at top right, rgba(255,61,90,0.06) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    /* ── Stats Grid ── */
+    .stats-grid-4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .stat-box {
+        background: var(--bg2);
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius);
+        padding: 20px 18px 16px;
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-box::before {
+        content: '';
+        position: absolute; left: 0; top: 0; bottom: 0;
+        width: 3px;
+    }
+    .sb-gold::before  { background: var(--gold); }
+    .sb-green::before { background: var(--green); }
+    .sb-red::before   { background: var(--red,#ff3d5a); }
+    .sb-blue::before  { background: var(--blue,#3b82f6); }
+    .sb-purple::before{ background: var(--purple,#a855f7); }
+    .stat-box-lbl { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 8px; }
+    .stat-box-val { font-size: 1.8rem; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+    .stat-box-sub { font-size: 0.75rem; color: var(--text-muted); }
+    .sb-gold .stat-box-val  { color: var(--gold); }
+    .sb-green .stat-box-val { color: var(--green); }
+    .sb-red .stat-box-val   { color: var(--red,#ff3d5a); }
+    .sb-blue .stat-box-val  { color: var(--blue,#3b82f6); }
+    .sb-purple .stat-box-val{ color: var(--purple,#a855f7); }
+
+    /* ── Charts ── */
+    .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .chart-box {
+        background: var(--bg2); border: 1px solid var(--border-soft);
+        border-radius: var(--radius); padding: 20px;
+    }
+    .chart-box-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 16px; }
+    .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 80px; }
+    .bar-col { flex: 1; background: rgba(240,180,41,0.15); border-radius: 3px 3px 0 0; transition: background 0.2s; cursor: default; position: relative; }
+    .bar-col:hover { background: rgba(240,180,41,0.3); }
+    .bar-label { font-size: 0.55rem; color: var(--text-dim); text-align: center; margin-top: 4px; }
+    .chart-footer { display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.78rem; color: var(--text-muted); }
+
+    /* ── Signal Form ── */
+    .signal-form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+    /* ── Data Table ── */
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--radius); border: 1px solid var(--border-soft); }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .data-table th { background: var(--surface); padding: 12px 14px; text-align: left; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); white-space: nowrap; }
+    .data-table td { padding: 12px 14px; border-top: 1px solid var(--border-soft); vertical-align: middle; }
+    .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* ── Log Items ── */
+    .log-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-soft); }
+    .log-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .log-msg  { flex: 1; }
+    .log-time { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; }
+    .log-msg div:first-child { font-size: 0.84rem; }
+
+    /* ── Sidebar backdrop (mobile) ── */
+    .admin-sidebar-backdrop {
+        display: none;
+        position: fixed; inset: 0; top: 64px;
+        background: rgba(0,0,0,0.55);
+        z-index: 299;
+        cursor: pointer;
+        touch-action: manipulation;
+    }
+    .admin-sidebar-backdrop.open { display: block; }
+
+    /* ── Toggle switch ── */
+    .toggle-wrap { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border-soft); }
+    .toggle-label { flex: 1; }
+    .toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: var(--surface); border-radius: 24px; cursor: pointer; transition: 0.3s; border: 1px solid var(--border-soft); }
+    .toggle-slider::before { content: ''; position: absolute; left: 3px; top: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--text-muted); transition: 0.3s; }
+    .toggle-switch input:checked + .toggle-slider { background: var(--gold); border-color: var(--gold); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); background: #000; }
+
+    /* ── Animations ── */
+    @keyframes slideIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Responsive ── */
+    @media (max-width: 1100px) {
+        .stats-grid-4 { grid-template-columns: repeat(2, 1fr); }
+        .chart-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 900px) {
+        .admin-sidebar {
+            transform: translateX(-260px);
+            pointer-events: none;
+            visibility: hidden;
+        }
+        .admin-sidebar.open {
+            transform: translateX(0);
+            pointer-events: auto;
+            visibility: visible;
+        }
+        .admin-main { margin-left: 0; }
+        .signal-form-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+        .admin-nav-badge { display: none !important; }
+        .admin-exit-text { display: none; }
+    }
+    @media (max-width: 600px) {
+        .stats-grid-4 { grid-template-columns: 1fr 1fr; }
+        .admin-main { padding: 16px 12px 48px; }
+        .signal-form-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 400px) {
+        .stats-grid-4 { grid-template-columns: 1fr; }
+    }
+
+    /* ── Toggle Switch ── */
+    .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-slider {
+        position: absolute; inset: 0;
+        background: var(--surface); border-radius: 24px;
+        cursor: pointer; transition: 0.3s;
+        border: 1px solid var(--border-soft);
+    }
+    .toggle-slider::before {
+        content: '';
+        position: absolute; left: 3px; top: 3px;
+        width: 16px; height: 16px; border-radius: 50%;
+        background: var(--text-muted); transition: 0.3s;
+    }
+    .toggle-switch input:checked + .toggle-slider { background: var(--gold); border-color: var(--gold); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); background: #000; }
+</style>
+</head>
+<body>
+
+<!-- Auth Nav -->
+<nav class="auth-nav">
+    <div class="auth-nav-left">
+        <button class="auth-hamburger" id="sidebarToggle">☰</button>
+        <a href="index.html" class="logo" style="font-size:0.9rem;">
+            <div class="logo-icon" style="width:26px;height:26px;font-size:0.85rem;">◈</div>
+            <span>INVESTY<span class="logo-accent">SIGNALS</span></span>
+        </a>
+        <span class="page-title">ADMIN PANEL</span>
+    </div>
+    <div class="auth-nav-right">
+        <span class="badge badge-red live-dot admin-nav-badge">ADMIN ACCESS</span>
+        <div class="user-chip">
+            <div class="user-avatar">A</div>
+            <span class="user-name">Admin</span>
+        </div>
+        <a href="index.html" class="btn btn-surface btn-sm admin-exit-btn">
+            <span class="admin-exit-text">← Exit Admin</span>
+        </a>
+    </div>
+</nav>
+
+<!-- Admin Sidebar Backdrop (mobile tap-outside-to-close) -->
+<div class="admin-sidebar-backdrop" id="adminBackdrop"></div>
+
+<div class="admin-wrapper">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-section">Overview</div>
+        <button class="menu-item active" onclick="showSection('overview', this)">
+            <span class="menu-icon">📊</span> Dashboard
+        </button>
+        <div class="sidebar-section">Management</div>
+        <button class="menu-item" onclick="showSection('users', this)">
+            <span class="menu-icon">👤</span> Users
+        </button>
+        <button class="menu-item" onclick="showSection('signals', this)">
+            <span class="menu-icon">⚡</span> Signals
+        </button>
+        <button class="menu-item" onclick="showSection('broadcast', this)">
+            <span class="menu-icon">📢</span> Announcements
+        </button>
+        <button class="menu-item" onclick="showSection('reports', this)">
+            <span class="menu-icon">🚩</span> Reports
+            <span class="menu-badge" id="reportsBadge" style="display:none;">0</span>
+        </button>
+        <button class="menu-item" onclick="showSection('balance-requests', this)">
+            <span class="menu-icon">💰</span> Balance Requests
+            <span class="menu-badge" id="balReqBadge" style="display:none;">0</span>
+        </button>
+
+        <div class="sidebar-section">System</div>
+        <button class="menu-item" onclick="showSection('settings', this)">
+            <span class="menu-icon">⚙️</span> Settings
+        </button>
+        <button class="menu-item" onclick="window.location.href='dashboard.html'" style="color:var(--blue,#3b82f6)">
+            <span class="menu-icon">👤</span> User Panel
+        </button>
+        <button class="menu-item danger" onclick="confirmLogout()">
+            <span class="menu-icon">🔓</span> Logout
+        </button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+
+        <!-- ── OVERVIEW ── -->
+        <div class="content-section active" id="section-overview">
+            <div class="admin-banner">
+                <div class="admin-banner-left">
+                    <div class="admin-pill">Admin Access</div>
+                    <h2>Control Center</h2>
+                    <p>System overview and platform statistics — <span id="adminDateTime"></span></p>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button class="btn btn-surface btn-sm" onclick="refreshStats()">🔄 Refresh</button>
+                    <button class="btn btn-gold btn-sm" onclick="showSection('signals', document.querySelector('.menu-item[onclick*=\'signals\']'))">+ New Signal</button>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid-4">
+                <div class="stat-box sb-gold">
+                    <div class="stat-box-lbl">Total Users</div>
+                    <div class="stat-box-val text-gold" id="adminTotalUsers">—</div>
+                    <div class="stat-box-sub" id="adminUserSub">Loading...</div>
+                </div>
+                <div class="stat-box sb-green">
+                    <div class="stat-box-lbl">Active Signals</div>
+                    <div class="stat-box-val text-green" id="adminActiveSignals">—</div>
+                    <div class="stat-box-sub" id="adminSignalSub">Loading...</div>
+                </div>
+
+                <div class="stat-box sb-red">
+                    <div class="stat-box-lbl">System Alerts</div>
+                    <div class="stat-box-val text-red" id="adminAlerts">0</div>
+                    <div class="stat-box-sub">System status</div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="chart-grid">
+                <div class="chart-box">
+                    <div class="chart-box-title">// Signal Volume (Last 7 Days)</div>
+                    <div class="bar-chart" id="barChart"></div>
+                    <div style="height:24px;"></div>
+                    <div style="display:flex;gap:16px;margin-top:8px;">
+                        <span style="font-size:0.78rem;color:var(--text-muted);">Total this week: <strong style="color:var(--text)">183</strong></span>
+                        <span style="font-size:0.78rem;color:var(--text-muted);">Avg/day: <strong style="color:var(--text)">26.1</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Second Row Stats -->
+            <div class="stats-grid-4" style="margin-bottom:24px;">
+                <div class="stat-box sb-purple">
+                    <div class="stat-box-lbl">Pro Subscribers</div>
+                    <div class="stat-box-val" style="color:var(--purple)" id="adminProCount">—</div>
+                    <div class="stat-box-sub">Pro subscribers</div>
+                </div>
+                <div class="stat-box sb-gold">
+                    <div class="stat-box-lbl">Elite Members</div>
+                    <div class="stat-box-val text-gold" id="adminEliteCount">—</div>
+                    <div class="stat-box-sub">Elite members</div>
+                </div>
+                <div class="stat-box sb-green">
+                    <div class="stat-box-lbl">MRR</div>
+                    <div class="stat-box-val text-green" id="adminMRR">—</div>
+                    <div class="stat-box-sub">Monthly revenue</div>
+                </div>
+                <div class="stat-box sb-blue">
+                    <div class="stat-box-lbl">Avg R:R (30d)</div>
+                    <div class="stat-box-val" style="color:var(--blue)" id="adminAvgRR">—</div>
+                    <div class="stat-box-sub">Target: ≥ 2.0×</div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="data-panel">
+                <div class="panel-header">
+                    <div class="panel-title">📋 Recent Activity</div>
+                    </div>
+                <div class="panel-body" id="recentActivity">
+                    <div style="padding:32px;text-align:center;color:var(--text-muted);font-size:0.88rem;">
+                        No recent activity yet. Activity will appear here once signals are posted.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── USERS ── -->
+        <div class="content-section" id="section-users">
+            <div class="admin-banner">
+                <div class="admin-banner-left">
+                    <div class="admin-pill">User Management</div>
+                    <h2>Manage Users</h2>
+                    <p>View, edit, and manage platform user accounts and permissions.</p>
+                </div>
+                <button class="btn btn-gold btn-sm">+ Add User</button>
+            </div>
+            <div class="stats-grid-4" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;">
+                <div class="stat-box sb-gold"><div class="stat-box-lbl">Total</div><div class="stat-box-val text-gold" id="userTotal">—</div></div>
+                <div class="stat-box sb-green"><div class="stat-box-lbl">Active</div><div class="stat-box-val text-green" id="userActive">—</div></div>
+                <div class="stat-box sb-blue"><div class="stat-box-lbl">Pro/Elite</div><div class="stat-box-val" style="color:var(--blue)" id="userPro">—</div></div>
+                <div class="stat-box sb-red"><div class="stat-box-lbl">Banned</div><div class="stat-box-val text-red" id="userBanned">—</div></div>
+            </div>
+            <div class="data-panel">
+                <div class="panel-header">
+                    <div class="panel-title">👤 All Users</div>
+                    <div class="panel-controls">
+                        <div class="search-wrap">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" class="search-box" placeholder="Search users..." id="userSearch" oninput="filterTable('userTable', this.value)">
+                        </div>
+                        <select class="input-control" id="userPlanFilter" style="width:auto;padding:8px 12px;font-size:0.85rem;" onchange="filterUsersByPlan(this.value)">
+                            <option value="">All Plans</option>
+                            <option value="free">Free</option>
+                            <option value="pro">Pro</option>
+                            <option value="elite">Elite</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-wrap panel-body">
+                    <table class="data-table" id="userTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>User / Email</th>
+                                <th>Plan</th>
+                                <th>Joined</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">
+                                    Loading users from database...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── SIGNALS ── -->
+        <div class="content-section" id="section-signals">
+            <div class="admin-banner">
+                <div class="admin-banner-left">
+                    <div class="admin-pill">Signal Management</div>
+                    <h2>Manage Signals</h2>
+                    <p>Create, edit, and monitor all trading signals.</p>
+                </div>
+            </div>
+
+            <!-- Create Signal Form -->
+            <div class="data-panel" style="margin-bottom:20px;">
+                <div class="panel-header">
+                    <div class="panel-title">⚡ Post New Signal</div>
+                </div>
+                <div style="padding:22px;">
+                    <div class="signal-form-grid">
+                        <div class="input-group">
+                            <label>Trading Pair</label>
+                            <input type="text" class="input-control" placeholder="e.g. BTCUSDT" id="f-pair">
+                        </div>
+                        <div class="input-group">
+                            <label>Direction</label>
+                            <select class="input-control" id="f-dir">
+                                <option value="LONG">LONG 🟢</option>
+                                <option value="SHORT">SHORT 🔴</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Leverage</label>
+                            <input type="text" class="input-control" placeholder="e.g. 10x" id="f-lev">
+                        </div>
+                        <div class="input-group">
+                            <label>Entry Price</label>
+                            <input type="number" class="input-control" placeholder="0.00" id="f-entry">
+                        </div>
+                        <div class="input-group">
+                            <label>Take Profit 1</label>
+                            <input type="number" class="input-control" placeholder="0.00" id="f-tp1">
+                        </div>
+                        <div class="input-group">
+                            <label>Take Profit 2</label>
+                            <input type="number" class="input-control" placeholder="0.00" id="f-tp2">
+                        </div>
+                        <div class="input-group">
+                            <label>Stop Loss</label>
+                            <input type="number" class="input-control" placeholder="0.00" id="f-sl">
+                        </div>
+                        <div class="input-group">
+                            <label>Score (0–100)</label>
+                            <input type="number" class="input-control" placeholder="e.g. 85" id="f-score" min="0" max="100">
+                        </div>
+                        <div class="input-group">
+                            <label>Plan Access</label>
+                            <select class="input-control" id="f-plan">
+                                <option>All (Free+)</option>
+                                <option>Pro+</option>
+                                <option>Elite Only</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Notes / Analysis</label>
+                        <textarea class="input-control" rows="3" id="f-notes" placeholder="Signal rationale, key levels, market context..."></textarea>
+                    </div>
+                    <div style="display:flex;gap:10px;">
+                        <button class="btn btn-gold" onclick="postSignal()">⚡ Post Signal</button>
+                        <button class="btn btn-surface" onclick="alert('Draft saving coming soon!')">Save Draft</button>
+                        <button class="btn btn-ghost" onclick="clearForm()">Clear</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Signals -->
+            <div class="data-panel">
+                <div class="panel-header">
+                    <div class="panel-title">📊 Active Signals</div>
+                    <span class="badge badge-green" id="adminSignalBadge">0 Active</span>
+                </div>
+                <div class="table-wrap panel-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Pair</th>
+                                <th>Dir</th>
+                                <th>Entry</th>
+                                <th>TP1</th>
+                                <th>SL</th>
+                                <th>Score</th>
+                                <th>Status</th>
+                                <th>Plan</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminSignalsBody">
+                            <tr>
+                                <td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted);">
+                                    No active signals. Post a new signal above.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── ANNOUNCEMENTS ── -->
+        <div class="content-section" id="section-broadcast">
+            <div class="admin-banner">
+                <div class="admin-banner-left">
+                    <div class="admin-pill">Announcements</div>
+                    <h2>Manage Announcements</h2>
+                    <p>Create and manage announcements shown to all users.</p>
+                </div>
+            </div>
+            <!-- Create Announcement -->
+            <div class="data-panel" style="margin-bottom:20px;">
+                <div class="panel-header"><div class="panel-title">📢 New Announcement</div></div>
+                <div style="padding:22px;">
+                    <div class="input-group">
+                        <label>Title</label>
+                        <input type="text" class="input-control" id="ann-title" placeholder="Announcement title...">
+                    </div>
+                    <div class="input-group">
+                        <label>Type</label>
+                        <select class="input-control" id="ann-type">
+                            <option value="info">ℹ️ Info</option>
+                            <option value="success">✅ Success</option>
+                            <option value="warning">⚠️ Warning</option>
+                            <option value="danger">🚨 Danger</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Message</label>
+                        <textarea class="input-control" rows="4" id="ann-message" placeholder="Your announcement message..."></textarea>
+                    </div>
+                    <div style="display:flex;gap:10px;">
+                        <button class="btn btn-gold" onclick="postAnnouncement()">📢 Post Announcement</button>
+                        <button class="btn btn-surface" onclick="sendBroadcastWS()">📡 WS Broadcast Only</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Announcements List -->
+            <div class="data-panel">
+                <div class="panel-header">
+                    <div class="panel-title">📋 All Announcements</div>
+                    <button class="btn btn-surface btn-sm" onclick="loadAnnouncements()">🔄 Refresh</button>
+                </div>
+                <div class="table-wrap panel-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Title</th><th>Type</th><th>Status</th><th>Date</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="annTableBody">
+                            <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── REPORTS ── -->
+        <div class="content-section" id="section-reports">
+            <div class="admin-banner">
+                <div class="admin-banner-left">
+                    <div class="admin-pill">Reports</div>
+                    <h2>User Reports</h2>
+                    <p>Reports submitted by users — signal issues, bugs, and other feedback.</p>
+                </div>
+                <button class="btn btn-surface btn-sm" onclick="loadReports()">🔄 Refresh</button>
+            </div>
+            <div class="stats-grid-4" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;">
+                <div class="stat-box sb-red"><div class="stat-box-lbl">Open</div><div class="stat-box-val text-red" id="repOpen">—</div></div>
+                <div class="stat-box sb-gold"><div class="stat-box-lbl">In Review</div><div class="stat-box-val text-gold" id="repReview">—</div></div>
+                <div class="stat-box sb-green"><div class="stat-box-lbl">Resolved</div><div class="stat-box-val text-green" id="repResolved">—</div></div>
+                <div class="stat-box sb-blue"><div class="stat-box-lbl">Total</div><div class="stat-box-val" style="color:var(--blue)" id="repTotal">—</div></div>
+            </div>
+            <div class="data-panel">
+                <div class="panel-header">
+                    <div class="panel-title">📋 All Reports</div>
+                    <div class="panel-controls">
+                        <select class="input-control" style="width:auto;padding:8px 12px;font-size:0.85rem;" id="repFilterStatus" onchange="loadReports()">
+                            <option value="">All Status</option>
+                            <option value="open">Open</option>
+                            <option value="in_review">In Review</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="dismissed">Dismissed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-wrap panel-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Category</th><th>Message</th><th>Reporter</th><th>Status</th><th>Date</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="reportsTableBody">
+                            <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">Loading reports...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── BALANCE REQUESTS ── -->
+        <div class="content-section" id="section-balance-requests">
+            <div class="admin-banner">
+                <div class="admin-banner-left">
+                    <div class="admin-pill">Balance Requests</div>
+                    <h2>Paper Trade Balance Requests</h2>
+                    <p>User balance reset/top-up requests waiting for admin approval.</p>
+                </div>
+                <button class="btn btn-surface btn-sm" onclick="loadBalanceRequests()">🔄 Refresh</button>
+            </div>
+            <div class="data-panel">
+                <div class="panel-header">
+                    <div class="panel-title">💰 Balance Requests</div>
+                    <span class="badge badge-gold" id="balReqPendingBadge" style="display:none;">0 Pending</span>
+                </div>
+                <div class="table-wrap panel-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Type</th>
+                                <th>Current</th>
+                                <th>Requested</th>
+                                <th>Reason</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="balReqTableBody">
+                            <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">Loading requests...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── SETTINGS ── -->
+        <div class="content-section" id="section-settings">
+            <div class="admin-banner">
+                <div class="admin-banner-left">
+                    <div class="admin-pill">Settings</div>
+                    <h2>System Settings</h2>
+                    <p>Platform configuration and admin credentials.</p>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+                <div class="data-panel">
+                    <div class="panel-header"><div class="panel-title">🔐 Change Password</div></div>
+                    <div style="padding:20px;">
+                        <div class="input-group"><label>Current Password</label><input type="password" class="input-control" placeholder="••••••••"></div>
+                        <div class="input-group"><label>New Password</label><input type="password" class="input-control" placeholder="••••••••"></div>
+                        <div class="input-group"><label>Confirm Password</label><input type="password" class="input-control" placeholder="••••••••"></div>
+                        <button class="btn btn-gold">Update Password</button>
+                    </div>
+                </div>
+                <div class="data-panel">
+                    <div class="panel-header"><div class="panel-title">⚙️ Platform Settings</div></div>
+                    <div style="padding:20px;display:flex;flex-direction:column;gap:16px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--surface);border-radius:var(--radius-sm);">
+                            <div>
+                                <div style="font-weight:600;font-size:0.9rem;">Maintenance Mode</div>
+                                <div style="font-size:0.78rem;color:var(--text-muted);">Show maintenance page to users</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="maintToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--surface);border-radius:var(--radius-sm);">
+                            <div>
+                                <div style="font-weight:600;font-size:0.9rem;">Auto-Signal Engine</div>
+                                <div style="font-size:0.78rem;color:var(--text-muted);">Enable automatic signal generation</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked id="engineToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--surface);border-radius:var(--radius-sm);">
+                            <div>
+                                <div style="font-weight:600;font-size:0.9rem;">New Registrations</div>
+                                <div style="font-size:0.78rem;color:var(--text-muted);">Allow new user sign-ups</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked id="regToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════ -->
+                <!-- AI SETTINGS PANEL                                   -->
+                <!-- ═══════════════════════════════════════════════════ -->
+                <div class="data-panel" style="margin-top:20px;">
+                    <div class="panel-header">
+                        <div class="panel-title">🤖 AI Analysis Settings</div>
+                        <div style="font-size:0.75rem;color:var(--text-muted);">Groq AI API configuration for deep analysis</div>
+                    </div>
+                    <div style="padding:20px;display:flex;flex-direction:column;gap:16px;">
+
+                        <!-- API Key -->
+                        <div>
+                            <label style="font-size:0.8rem;font-weight:600;color:var(--text-sub);display:block;margin-bottom:6px;">
+                                🔑 Groq API Key
+                            </label>
+                            <div style="display:flex;gap:8px;">
+                                <input type="password" id="aiApiKeyInput" class="input-control"
+                                    placeholder="gsk_••••••••••••••••••••••••••"
+                                    style="flex:1;font-family:'JetBrains Mono',monospace;font-size:0.82rem;">
+                                <button onclick="toggleApiKeyVisibility()" class="btn" id="aiKeyToggleBtn"
+                                    style="padding:0 12px;background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-sm);cursor:pointer;font-size:0.75rem;color:var(--text-sub);">
+                                    👁 Show
+                                </button>
+                            </div>
+                            <div id="aiKeyCurrentDisplay" style="margin-top:6px;font-size:0.72rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;"></div>
+                            <div style="margin-top:4px;font-size:0.7rem;color:var(--text-muted);">
+                                Get your key at <a href="https://console.groq.com" target="_blank" style="color:var(--gold);">console.groq.com</a>
+                                · Leave empty to use server .env key
+                            </div>
+                        </div>
+
+                        <!-- Model Select -->
+                        <div>
+                            <label style="font-size:0.8rem;font-weight:600;color:var(--text-sub);display:block;margin-bottom:6px;">
+                                🧠 AI Model
+                            </label>
+                            <select id="aiModelSelect" class="input-control" style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;">
+                                <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile ⭐ (Recommended)</option>
+                                <option value="llama-3.1-70b-versatile">llama-3.1-70b-versatile</option>
+                                <option value="llama-3.1-8b-instant">llama-3.1-8b-instant (Fast)</option>
+                                <option value="llama3-70b-8192">llama3-70b-8192</option>
+                                <option value="llama3-8b-8192">llama3-8b-8192 (Fast)</option>
+                                <option value="mixtral-8x7b-32768">mixtral-8x7b-32768</option>
+                                <option value="gemma2-9b-it">gemma2-9b-it</option>
+                            </select>
+                            <div style="margin-top:4px;font-size:0.7rem;color:var(--text-muted);">
+                                Larger models = better analysis quality · Smaller models = faster response
+                            </div>
+                        </div>
+
+                        <!-- Max Tokens + Temperature -->
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div>
+                                <label style="font-size:0.8rem;font-weight:600;color:var(--text-sub);display:block;margin-bottom:6px;">
+                                    📊 Max Tokens
+                                </label>
+                                <input type="number" id="aiMaxTokensInput" class="input-control"
+                                    value="1500" min="100" max="8000" step="100"
+                                    style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;">
+                                <div style="margin-top:4px;font-size:0.7rem;color:var(--text-muted);">100 – 8000 (1500 recommended)</div>
+                            </div>
+                            <div>
+                                <label style="font-size:0.8rem;font-weight:600;color:var(--text-sub);display:block;margin-bottom:6px;">
+                                    🌡️ Temperature
+                                </label>
+                                <input type="number" id="aiTempInput" class="input-control"
+                                    value="0.2" min="0" max="2" step="0.1"
+                                    style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;">
+                                <div style="margin-top:4px;font-size:0.7rem;color:var(--text-muted);">0.0 = precise · 1.0 = creative</div>
+                            </div>
+                        </div>
+
+                        <!-- Result message -->
+                        <div id="aiSettingsMsg" style="display:none;padding:10px 14px;border-radius:var(--radius-sm);font-size:0.82rem;font-weight:600;"></div>
+
+                        <!-- Buttons -->
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                            <button onclick="saveAiSettings()" class="btn btn-gold" style="flex:1;min-width:120px;">
+                                💾 Save Settings
+                            </button>
+                            <button onclick="testAiKey()" class="btn" id="aiTestBtn"
+                                style="flex:1;min-width:120px;background:var(--surface);border:1px solid var(--border-soft);color:var(--text);">
+                                🧪 Test API Key
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+</div>
+
+
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+const auth = getAuth(initializeApp({
+  apiKey:"AIzaSyA49TYbX5omoN56bffDnlqZGGjjpKZtOvk",
+  authDomain:"investysignals-890ba.firebaseapp.com", projectId:"investysignals-890ba",
+  storageBucket:"investysignals-890ba.firebasestorage.app", messagingSenderId:"1045281522975",
+  appId:"1:1045281522975:web:47c4b8d32c5f235a7bdc2a"
+}));
+onAuthStateChanged(auth, async u => {
+  if (!u) { window.location.href = 'login.html'; return; }
+  try {
+    const idToken = await u.getIdToken();
+    const sr = await fetch('/api/user/status', {
+      headers: { 'Authorization': 'Bearer ' + idToken }
+    });
+    const sj = await sr.json();
+    if (!sj.success || sj.status.role !== 'admin') {
+      window.location.href = 'dashboard.html';
+      return;
+    }
+  } catch(err) {
+    console.warn('Admin check failed, retrying...', err.message);
+    await new Promise(r => setTimeout(r, 2000));
+    try {
+      const idToken2 = await u.getIdToken(true);
+      const sr2 = await fetch('/api/user/status', {
+        headers: { 'Authorization': 'Bearer ' + idToken2 }
+      });
+      const sj2 = await sr2.json();
+      if (!sj2.success || sj2.status.role !== 'admin') {
+        window.location.href = 'dashboard.html'; return;
+      }
+    } catch(_) {
+      window.location.href = 'dashboard.html'; return;
+    }
+  }
+  window._adminAuth = auth;
+  window._adminUser = u;
+  // Show admin content (remove loading overlay if any)
+  const overlay = document.getElementById('adminLoadingOverlay');
+  if (overlay) overlay.style.display = 'none';
+  if (typeof loadAdminStats === 'function') loadAdminStats();
+
+  // FIX 4: WebSocket for real-time admin notifications
+  try {
+    const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const tok = await u.getIdToken();
+    const adminWs = new WebSocket(`${wsProto}//${location.host}?token=${encodeURIComponent(tok)}`);
+    adminWs.onmessage = e => {
+      try {
+        const d = JSON.parse(e.data);
+        // New signal posted (from another admin session) or signal changed
+        if (d.type === 'new_signal' || d.type === 'signal_update' || d.type === 'signal_deleted') {
+          if (typeof loadAdminStats === 'function') loadAdminStats();
+        }
+        // New report submitted by a user - update badge
+        if (d.type === 'balance_request') {
+          const b = document.getElementById('balReqBadge');
+          if (b) { const c = (parseInt(b.textContent)||0)+1; b.textContent=c; b.style.display=''; }
+          if (typeof loadBalanceRequests === 'function' && document.getElementById('section-balance-requests')?.style.display!=='none') loadBalanceRequests();
+        }
+        if (d.type === 'new_report') {
+          const badge = document.getElementById('reportsBadge');
+          if (badge) {
+            const cur = parseInt(badge.textContent) || 0;
+            badge.textContent = cur + 1;
+            badge.style.display = '';
+          }
+        }
+      } catch(_) {}
+    };
+    adminWs.onerror = () => {};
+  } catch(_) {}
+});
+window.adminSignOut = async function() {
+  if(confirm('Are you sure you want to logout from admin?')) {
+    await signOut(auth);
+    window.location.href = 'login.html';
+  }
+};
+</script>
+
+<script>
+    // Toast notification
+    function showToast(msg, type) {
+        let box = document.getElementById('adminToastBox');
+        if (!box) { box = document.createElement('div'); box.id='adminToastBox'; box.style.cssText='position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;'; document.body.appendChild(box); }
+        const t = document.createElement('div');
+        const color  = type==='error' ? 'rgba(255,61,90,0.15)' : 'rgba(0,255,136,0.1)';
+        const border = type==='error' ? 'rgba(255,61,90,0.3)'  : 'rgba(0,255,136,0.3)';
+        t.style.cssText = `background:${color};border:1px solid ${border};border-radius:12px;padding:12px 20px;font-size:0.88rem;max-width:320px;color:var(--text);`;
+        t.textContent = msg; box.appendChild(t);
+        setTimeout(() => t.remove(), 4000);
+    }
+
+    // Section switching
+    function showSection(id, el) {
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        const sec = document.getElementById('section-' + id);
+        if (!sec) return;
+        sec.classList.add('active');
+        if(el) {
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            el.classList.add('active');
+        }
+        if (id === 'users'     && typeof loadUsers         === 'function') loadUsers();
+        if (id === 'reports'   && typeof loadReports        === 'function') loadReports();
+        if (id === 'balance-requests' && typeof loadBalanceRequests === 'function') loadBalanceRequests();
+        if (id === 'broadcast' && typeof loadAnnouncements  === 'function') loadAnnouncements();
+        if (id === 'signals'   && typeof loadAdminStats     === 'function') loadAdminStats();
+        if (id === 'settings'  && typeof loadAdminStats     === 'function') loadAdminStats();
+    }
+
+    // Sidebar toggle (mobile)
+    const sidebar  = document.getElementById('adminSidebar');
+    const backdrop = document.getElementById('adminBackdrop');
+
+    function openSidebar() {
+        sidebar.classList.add('open');
+        backdrop.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+        sidebar.classList.remove('open');
+        backdrop.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+    function toggleSidebar() {
+        sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+    }
+
+    // Use both click and touchend for maximum compatibility
+    // touchend with preventDefault stops the 300ms click delay on iOS
+    var toggleBtn = document.getElementById('sidebarToggle');
+    var _touched = false;
+    toggleBtn.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        _touched = true;
+        toggleSidebar();
+    }, { passive: false });
+    toggleBtn.addEventListener('click', function(e) {
+        if (_touched) { _touched = false; return; } // already handled by touchend
+        toggleSidebar();
+    });
+
+    backdrop.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        closeSidebar();
+    }, { passive: false });
+    backdrop.addEventListener('click', closeSidebar);
+
+    // Close sidebar when a menu item is selected on mobile
+    document.querySelectorAll('.admin-sidebar .menu-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+            if (window.innerWidth <= 900) closeSidebar();
+        });
+    });
+
+    // DateTime
+    function updateTime() {
+        const now = new Date();
+        document.getElementById('adminDateTime').textContent =
+            now.toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+    }
+    updateTime();
+
+    // Bar chart
+    const barData = [22, 31, 18, 28, 35, 21, 28];
+    const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const maxBar = Math.max(...barData);
+    const barChart = document.getElementById('barChart');
+    if(barChart) {
+        barData.forEach((v, i) => {
+            const col = document.createElement('div');
+            col.className = 'bar-col';
+            col.setAttribute('data-label', days[i]);
+            col.style.height = (v / maxBar * 90) + '%';
+            col.style.background = i === 4 ? 'var(--gold)' : 'var(--surface3)';
+            barChart.appendChild(col);
+        });
+    }
+
+    // Activity Log — loaded from server
+    // ── Helper: get auth token ──────────────────────────────────
+    async function getToken() {
+        return window._adminUser ? await window._adminUser.getIdToken() : '';
+    }
+
+    // ── Load Users ──────────────────────────────────────────────
+    async function loadUsers() {
+        const tbody = document.getElementById('userTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">Loading users…</td></tr>';
+        try {
+            const idToken = await getToken();
+            const res  = await fetch('/api/admin/users', { headers: { 'Authorization': 'Bearer ' + idToken } });
+            const data = await res.json();
+            if (!data.success || !Array.isArray(data.users)) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--red);">Failed to load users. Check console.</td></tr>';
+                return;
+            }
+            const users = data.users;
+            // Update mini stats
+            const set = (id, v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+            set('userTotal',  users.length);
+            set('userActive', users.filter(u => !u.suspended).length);
+            set('userPro',    users.filter(u => u.plan==='pro'||u.plan==='elite').length);
+            set('userBanned', users.filter(u => u.suspended).length);
+            if (!users.length) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">No users registered yet.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = users.map((u, i) => {
+                const planColor = { free:'outline', pro:'gold', elite:'purple' }[u.plan] || 'outline';
+                const joined = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+                const statusBadge = u.suspended
+                    ? '<span class="badge badge-red" style="font-size:0.68rem;">Suspended</span>'
+                    : u.role==='admin'
+                        ? '<span class="badge badge-red" style="font-size:0.68rem;">Admin</span>'
+                        : '<span class="badge badge-green" style="font-size:0.68rem;">Active</span>';
+                const safeName = (u.displayName||u.email||'').replace(/'/g,'').replace(/"/g,'');
+                return `<tr>
+                    <td class="mono" style="color:var(--text-muted);font-size:0.8rem;">${i+1}</td>
+                    <td>
+                        <div style="font-weight:600;font-size:0.875rem;">${u.displayName||'—'}</div>
+                        <div style="font-size:0.75rem;color:var(--text-muted);">${u.email||'—'}</div>
+                    </td>
+                    <td><span class="badge badge-${planColor}" style="font-size:0.68rem;text-transform:uppercase;">${u.plan||'free'}</span></td>
+                    <td style="font-size:0.8rem;color:var(--text-muted);">${joined}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                            <button class="btn btn-surface btn-sm" onclick="toggleSuspend('${u.uid}', ${!u.suspended}, '${safeName}')">
+                                ${u.suspended ? '✅ Unsuspend' : '🚫 Suspend'}
+                            </button>
+                            <select class="input-control" style="width:auto;padding:4px 8px;font-size:0.78rem;" onchange="changePlan('${u.uid}', this.value)">
+                                <option ${u.plan==='free'?'selected':''} value="free">Free</option>
+                                <option ${u.plan==='pro'?'selected':''} value="pro">Pro</option>
+                                <option ${u.plan==='elite'?'selected':''} value="elite">Elite</option>
+                            </select>
+                            <button class="btn btn-sm" style="background:rgba(255,61,90,0.12);color:var(--red,#ff3d5a);border:1px solid rgba(255,61,90,0.3);" onclick="deleteUser('${u.uid}', '${safeName}')">
+                                🗑 Delete
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        } catch(e) {
+            console.error('[Admin] loadUsers error:', e);
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--red);">Error: ' + e.message + '</td></tr>';
+        }
+    }
+
+    async function toggleSuspend(uid, suspend, name) {
+        if (!confirm((suspend ? 'Suspend' : 'Unsuspend') + ' user ' + name + '?')) return;
+        try {
+            const idToken = await getToken();
+            const res  = await fetch('/api/admin/users/' + uid, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+                body: JSON.stringify({ suspended: suspend, suspendReason: suspend ? 'Suspended by admin' : '' })
+            });
+            const j = await res.json();
+            if (j.success) loadUsers();
+            else alert('❌ ' + (j.error || 'Failed'));
+        } catch(e) { alert('❌ ' + e.message); }
+    }
+
+    async function changePlan(uid, plan) {
+        try {
+            const idToken = await getToken();
+            const res  = await fetch('/api/admin/users/' + uid, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+                body: JSON.stringify({ plan })
+            });
+            const j = await res.json();
+            if (j.success) { loadUsers(); }
+            else alert('❌ ' + (j.error || 'Failed to update plan'));
+        } catch(e) { alert('❌ ' + e.message); }
+    }
+
+    async function deleteUser(uid, name) {
+        if (!confirm(`⚠️ Permanently delete user "${name}"?\n\nThis will remove them from the database and Firebase. This cannot be undone.`)) return;
+        try {
+            const idToken = await getToken();
+            const res = await fetch('/api/admin/users/' + uid, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + idToken }
+            });
+            const j = await res.json();
+            if (j.success) { loadUsers(); loadAdminStats(); }
+            else alert('❌ ' + (j.error || 'Failed to delete user'));
+        } catch(e) { alert('❌ ' + e.message); }
+    }
+
+    // ── Load Stats ──────────────────────────────────────────────
+    async function loadAdminStats() {
+        try {
+            // FIX: include auth token + use correct endpoints
+            const idToken = await getToken();
+            const headers = { 'Authorization': 'Bearer ' + idToken };
+            const [sigR, statsR] = await Promise.all([
+                fetch('/api/signals',       { headers }).then(r => r.json()),
+                fetch('/api/admin/stats',   { headers }).then(r => r.json()).catch(() => ({ success: false })),
+            ]);
+
+            // FIX: server returns { signals: [...] } not { data: [...] }
+            if (sigR.success && Array.isArray(sigR.signals)) {
+                const all    = sigR.signals;
+                const active = all.filter(s => s.status === 'ACTIVE');
+                const tp1    = all.filter(s => s.status === 'TP1_HIT');
+                const tp2    = all.filter(s => s.status === 'TP2_HIT');
+                const sl     = all.filter(s => s.status === 'SL_HIT');
+                const wins   = tp1.length + tp2.length;
+                const closed = wins + sl.length;
+                const el_a   = document.getElementById('adminActiveSignals'); if(el_a) el_a.textContent = active.length;
+                const el_s   = document.getElementById('adminSignalSub');     if(el_s) el_s.textContent = all.length + ' total';
+                const el_b   = document.getElementById('adminSignalBadge');   if(el_b) el_b.textContent = active.length + ' Active';
+                // win/loss stats removed (user request)
+                const tbody = document.getElementById('adminSignalsBody');
+                if (tbody) {
+                    tbody.innerHTML = active.length === 0
+                        ? '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted);">No active signals. Post a new signal above.</td></tr>'
+                        : active.map(s => `<tr>
+                            <td class="mono">${s.pair||'—'}</td>
+                            <td><span class="badge badge-${s.direction==='LONG'?'green':'red'}" style="font-size:0.7rem;">${s.direction}</span></td>
+                            <td class="mono">${s.entry||'—'}</td>
+                            <td class="mono" style="color:var(--green)">${s.tp1||'—'}</td>
+                            <td class="mono" style="color:var(--red)">${s.sl||'—'}</td>
+                            <td class="mono">${s.score||'—'}</td>
+                            <td><span class="badge badge-outline" style="font-size:0.68rem;">${s.status||'ACTIVE'}</span></td>
+                            <td style="color:var(--text-muted);font-size:0.8rem;">${s.plan||'All'}</td>
+                            <td><button class="btn btn-surface btn-sm" onclick="closeSignal('${s._id}')">Close</button></td>
+                          </tr>`).join('');
+                }
+            }
+            // FIX: use /api/admin/stats, response key is statsR.stats (not repR.data)
+            if (statsR.success && statsR.stats) {
+                const s = statsR.stats;
+                const set = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
+                set('adminTotalUsers', s.totalUsers !== undefined ? s.totalUsers : '—');
+                set('adminUserSub',    (s.newUsersToday||0) + ' new today');
+                set('adminProCount',   s.proCount !== undefined ? s.proCount : '—');
+                set('adminEliteCount', s.eliteCount !== undefined ? s.eliteCount : '—');
+                set('adminMRR',        '—'); // not in DB yet
+                set('adminAvgRR',      s.avgRR ? s.avgRR + '×' : '—');
+                set('userTotal',       s.totalUsers !== undefined ? s.totalUsers : '—');
+                set('userActive',      s.totalUsers !== undefined ? s.totalUsers - (s.bannedCount||0) : '—');
+                set('userPro',         (s.proCount||0) + (s.eliteCount||0));
+                set('userBanned',      s.bannedCount !== undefined ? s.bannedCount : '0');
+                set('adminAlerts',     s.openTrades ? s.openTrades : '0');
+                // Update reports badge if openReports available
+                if (s.openReports !== undefined) {
+                    const badge = document.getElementById('reportsBadge');
+                    if (badge) {
+                        badge.textContent = s.openReports;
+                        badge.style.display = s.openReports > 0 ? '' : 'none';
+                    }
+                }
+            }
+        } catch(e) { console.warn('[Admin] Stats load failed:', e); }
+
+
+
+        // Load settings (maintenance state)
+        try {
+            const idToken2 = await getToken();
+            const setR = await fetch('/api/admin/settings', {
+                headers: { 'Authorization': 'Bearer ' + idToken2 }
+            }).then(r => r.json()).catch(() => ({ success: false }));
+            if (setR.success && setR.settings) {
+                const mt = document.getElementById('maintToggle');
+                if (mt) mt.checked = !!setR.settings.maintenance;
+                const et = document.getElementById('engineToggle');
+                if (et) et.checked = !!setR.settings.autoEngine;
+                const rt = document.getElementById('regToggle');
+                if (rt) rt.checked = !!setR.settings.allowRegistrations;
+            }
+        } catch(_) {}
+
+        // Load AI settings
+        try {
+            const idToken3 = await getToken();
+            const aiR = await fetch('/api/admin/ai-settings', {
+                headers: { 'Authorization': 'Bearer ' + idToken3 }
+            }).then(r => r.json()).catch(() => ({ success: false }));
+            if (aiR.success && aiR.settings) {
+                const s = aiR.settings;
+                // Show masked key
+                const keyDisplay = document.getElementById('aiKeyCurrentDisplay');
+                if (keyDisplay) keyDisplay.textContent = 'Current: ' + (s.groq_api_key_masked || '(using .env key)');
+                // Set model
+                const modelSel = document.getElementById('aiModelSelect');
+                if (modelSel && s.groq_model) modelSel.value = s.groq_model;
+                // Set tokens
+                const tokInput = document.getElementById('aiMaxTokensInput');
+                if (tokInput && s.groq_max_tokens) tokInput.value = s.groq_max_tokens;
+                // Set temperature
+                const tempInput = document.getElementById('aiTempInput');
+                if (tempInput && s.groq_temperature !== undefined) tempInput.value = s.groq_temperature;
+            }
+        } catch(_) {}
+    }  // end loadAdminStats
+
+    async function refreshStats() {
+        document.querySelectorAll('.stat-box-val').forEach(v => { v.style.opacity = '0.4'; });
+        await loadAdminStats();
+        document.querySelectorAll('.stat-box-val').forEach(v => { v.style.opacity = '1'; });
+        // Also reload users if users section is visible
+        const userSec = document.getElementById('section-users');
+        if (userSec && userSec.classList.contains('active')) loadUsers();
+    }
+
+    async function postSignal() {
+        const pair = document.getElementById('f-pair').value.trim().toUpperCase();
+        if(!pair) { alert('Enter a trading pair'); return; }
+        const body = {
+            pair,
+            direction: document.getElementById('f-dir').value,
+            leverage:  document.getElementById('f-lev').value || '10x',
+            entry:     parseFloat(document.getElementById('f-entry').value)||0,
+            tp1:       parseFloat(document.getElementById('f-tp1').value)||0,
+            tp2:       parseFloat(document.getElementById('f-tp2').value)||0,
+            sl:        parseFloat(document.getElementById('f-sl').value)||0,
+            score:     parseInt(document.getElementById('f-score').value)||0,
+            plan:      (() => { const v = document.getElementById('f-plan').value; return v === 'Pro+' ? 'pro' : v === 'Elite Only' ? 'elite' : 'free'; })(),
+            notes:     document.getElementById('f-notes')?.value.trim() || '',
+        };
+        try {
+            const idToken = window._adminUser ? await window._adminUser.getIdToken() : '';
+            const res = await fetch('/api/signals', {
+                method:'POST',
+                headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken},
+                body: JSON.stringify(body)
+            });
+            const j = await res.json();
+            if(j.success) { alert('✅ Signal posted for '+pair+'!'); clearForm(); loadAdminStats(); }
+            else alert('❌ '+(j.error||j.message||'Failed to post signal'));
+        } catch(e) { alert('❌ Server error: '+e.message); }
+    }
+
+    async function closeSignal(id) {
+        if(!id||!confirm('Close this signal?')) return;
+        try {
+            const idToken = window._adminUser ? await window._adminUser.getIdToken() : '';
+            const res = await fetch('/api/signals/'+id, {
+                method:'PATCH',
+                headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken},
+                body: JSON.stringify({status:'CANCELLED', active:false})
+            });
+            const j = await res.json();
+            if(j.success) loadAdminStats();
+            else alert('❌ '+(j.error||j.message||'Failed'));
+        } catch(e) { alert('❌ '+e.message); }
+    }
+
+    function confirmLogout() { if(typeof adminSignOut==='function') adminSignOut(); else window.location.href='login.html'; }
+
+    function filterTable(tableId, query) {
+        const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+        const q = query.toLowerCase();
+        rows.forEach(row => { row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none'; });
+    }
+
+    // ── Reports (රිපෝර්ටු) ───────────────────────────────
+    async function loadReports() {
+        const tbody = document.getElementById('reportsTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">Loading...</td></tr>';
+        try {
+            const idToken = await getToken();
+            const status  = document.getElementById('repFilterStatus')?.value || '';
+            const url = '/api/admin/reports' + (status ? '?status=' + status : '');
+            const data = await fetch(url, { headers: { 'Authorization': 'Bearer ' + idToken } }).then(r => r.json());
+            if (!data.success) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--red);">Failed to load reports. Check console.</td></tr>';
+                return;
+            }
+            const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+            const reports = data.data || [];
+            const open     = reports.filter(r => r.status === 'open').length;
+            const inReview = reports.filter(r => r.status === 'in_review').length;
+            const resolved = reports.filter(r => r.status === 'resolved').length;
+            set('repOpen',     data.openCount ?? open);
+            set('repReview',   inReview);
+            set('repResolved', resolved);
+            set('repTotal',    data.total ?? reports.length);
+            // Update sidebar badge
+            const badge = document.getElementById('reportsBadge');
+            if (badge) {
+                const openCnt = data.openCount ?? open;
+                badge.textContent = openCnt;
+                badge.style.display = openCnt > 0 ? '' : 'none';
+            }
+            if (!reports.length) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">No reports found.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = reports.map((r, i) => {
+                const stColor = { open:'red', in_review:'gold', resolved:'green', dismissed:'muted' }[r.status] || 'muted';
+                const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
+                const msg  = (r.message || '').slice(0, 80) + (r.message?.length > 80 ? '…' : '');
+                return `<tr>
+                    <td><span class="badge badge-outline" style="font-size:0.68rem;">${r.category}</span></td>
+                    <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.83rem;">${msg}</td>
+                    <td style="font-size:0.8rem;color:var(--text-muted);">${r.reporterEmail||'anonymous'}</td>
+                    <td><span class="badge badge-${stColor}" style="font-size:0.68rem;">${r.status}</span></td>
+                    <td style="font-size:0.8rem;color:var(--text-muted);">${date}</td>
+                    <td>
+                        <div style="display:flex;gap:6px;">
+                            <select class="input-control" style="width:auto;padding:4px 8px;font-size:0.75rem;" onchange="updateReportStatus('${r._id}', this.value)">
+                                <option ${r.status==='open'?'selected':''} value="open">Open</option>
+                                <option ${r.status==='in_review'?'selected':''} value="in_review">In Review</option>
+                                <option ${r.status==='resolved'?'selected':''} value="resolved">Resolved</option>
+                                <option ${r.status==='dismissed'?'selected':''} value="dismissed">Dismissed</option>
+                            </select>
+                            <button class="btn btn-surface btn-sm" onclick="deleteReport('${r._id}')">🗑</button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        } catch(e) {
+            console.error('[Admin] loadReports error:', e);
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--red);">Error: ' + e.message + '</td></tr>';
+        }
+    }
+
+    async function updateReportStatus(id, status) {
+        try {
+            const idToken = await getToken();
+            await fetch('/api/admin/reports/' + id, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+                body: JSON.stringify({ status, readByAdmin: true })
+            });
+            loadReports();
+        } catch(e) { alert('❌ ' + e.message); }
+    }
+
+    async function deleteReport(id) {
+        if (!confirm('Delete this report permanently?')) return;
+        try {
+            const idToken = await getToken();
+            await fetch('/api/admin/reports/' + id, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + idToken }
+            });
+            loadReports();
+        } catch(e) { alert('❌ ' + e.message); }
+    }
+
+    // ── Announcements ────────────────────────────────────────────
+    async function loadAnnouncements() {
+        const tbody = document.getElementById('annTableBody');
+        if (!tbody) return;
+        try {
+            const idToken = await getToken();
+            const data = await fetch('/api/admin/announcements', {
+                headers: { 'Authorization': 'Bearer ' + idToken }
+            }).then(r => r.json());
+            const anns = data.data || [];
+            if (!anns.length) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">No announcements yet.</td></tr>';
+                return;
+            }
+            const typeColor = { info:'blue', warning:'gold', success:'green', danger:'red' };
+            tbody.innerHTML = anns.map(a => {
+                const tc   = typeColor[a.type] || 'blue';
+                const date = a.createdAt ? new Date(a.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
+                return `<tr>
+                    <td style="font-weight:600;">${a.title}</td>
+                    <td><span class="badge badge-${tc}" style="font-size:0.68rem;">${a.type}</span></td>
+                    <td>${a.active ? '<span style="color:var(--green);">✓ Active</span>' : '<span style="color:var(--text-muted);">Inactive</span>'}</td>
+                    <td style="font-size:0.8rem;color:var(--text-muted);">${date}</td>
+                    <td>
+                        <div style="display:flex;gap:6px;">
+                            <button class="btn btn-surface btn-sm" onclick="toggleAnn('${a._id}', ${!a.active})">${a.active ? '⏸ Deactivate' : '▶ Activate'}</button>
+                            <button class="btn btn-surface btn-sm" onclick="deleteAnn('${a._id}')">🗑</button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        } catch(e) { console.error('[Admin] loadAnnouncements error:', e); }
+    }
+
+    async function postAnnouncement() {
+        const title   = document.getElementById('ann-title')?.value.trim();
+        const message = document.getElementById('ann-message')?.value.trim();
+        const type    = document.getElementById('ann-type')?.value || 'info';
+        if (!title || !message) { alert('Title and message are required'); return; }
+        try {
+            const idToken = await getToken();
+            const res = await fetch('/api/admin/announcements', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+                body: JSON.stringify({ title, message, type, active: true })
+            });
+            const j = await res.json();
+            if (j.success) {
+                alert('✅ Announcement posted and saved!');
+                document.getElementById('ann-title').value = '';
+                document.getElementById('ann-message').value = '';
+                loadAnnouncements();
+            } else {
+                alert('❌ ' + (j.error || 'Failed'));
+            }
+        } catch(e) { alert('❌ ' + e.message); }
+    }
+
+    async function toggleAnn(id, active) {
+        try {
+            const idToken = await getToken();
+            await fetch('/api/admin/announcements/' + id, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+                body: JSON.stringify({ active })
+            });
+            loadAnnouncements();
+        } catch(e) { alert('❌ ' + e.message); }
+    }
+
+    async function deleteAnn(id) {
+        if (!confirm('Delete this announcement?')) return;
+        try {
+            const idToken = await getToken();
+            await fetch('/api/admin/announcements/' + id, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + idToken }
+            });
+            loadAnnouncements();
+        } catch(e) { alert('❌ ' + e.message); }
+    }
+
+    // ── WS-only broadcast (no DB save) ─────────────────────────
+    async function sendBroadcastWS() {
+        const message = document.getElementById('ann-message')?.value.trim();
+        const title   = document.getElementById('ann-title')?.value.trim();
+        if (!message) { alert('Enter a message first'); return; }
+        try {
+            const idToken = await getToken();
+            const res = await fetch('/api/admin/broadcast', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+                body: JSON.stringify({ subject: title, message, saveToDb: false })
+            });
+            const j = await res.json();
+            if (j.success) alert('✅ Broadcast sent to all connected users (not saved to DB)!');
+            else alert('❌ ' + (j.error || 'Failed'));
+        } catch(e) { alert('❌ ' + e.message); }
+    }
+
+    function clearForm() {
+        ['f-pair','f-lev','f-entry','f-tp1','f-tp2','f-sl','f-score','f-notes'].forEach(id => {
+            const el = document.getElementById(id); if(el) el.value = '';
+        });
+        const dir = document.getElementById('f-dir'); if(dir) dir.selectedIndex = 0;
+        const plan = document.getElementById('f-plan'); if(plan) plan.selectedIndex = 0;
+    }
+
+    // ── Broadcast Send ──────────────────────────────────────────
+    // FIX: was onclick-less button — now wired to this function
+    async function sendBroadcast() {
+        // Use postAnnouncement() to save to DB, or sendBroadcastWS() for WS-only
+        await sendBroadcastWS();
+    }
+
+    // ── Settings Toggles (Maintenance, Engine, Registrations) ──
+    // FIX: maintToggle had no event listener — wires all three toggles to API
+    // ── AI Settings Functions ──────────────────────────────────
+    let _aiKeyVisible = false;
+    function toggleApiKeyVisibility() {
+        _aiKeyVisible = !_aiKeyVisible;
+        const inp = document.getElementById('aiApiKeyInput');
+        const btn = document.getElementById('aiKeyToggleBtn');
+        if (!inp || !btn) return;
+        inp.type = _aiKeyVisible ? 'text' : 'password';
+        btn.textContent = _aiKeyVisible ? '🙈 Hide' : '👁 Show';
+    }
+
+    function showAiMsg(msg, isError) {
+        const el = document.getElementById('aiSettingsMsg');
+        if (!el) return;
+        el.style.display = 'block';
+        el.style.background = isError ? 'rgba(255,59,92,0.12)' : 'rgba(16,185,129,0.12)';
+        el.style.border = '1px solid ' + (isError ? 'rgba(255,59,92,0.3)' : 'rgba(16,185,129,0.3)');
+        el.style.color = isError ? 'var(--red,#ff4d4f)' : 'var(--green,#10b981)';
+        el.textContent = msg;
+        setTimeout(() => { el.style.display = 'none'; }, 5000);
+    }
+
+    async function saveAiSettings() {
+        const key      = document.getElementById('aiApiKeyInput')?.value.trim();
+        const model    = document.getElementById('aiModelSelect')?.value;
+        const maxTok   = parseInt(document.getElementById('aiMaxTokensInput')?.value);
+        const temp     = parseFloat(document.getElementById('aiTempInput')?.value);
+
+        const body = { groq_model: model, groq_max_tokens: maxTok, groq_temperature: temp };
+        if (key) body.groq_api_key = key; // only send if user typed something
+
+        try {
+            const idToken = await getToken();
+            const res = await fetch('/api/admin/ai-settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+                body: JSON.stringify(body)
+            });
+            const j = await res.json();
+            if (j.success) {
+                showAiMsg('✅ AI settings saved! Updated: ' + (j.updated || []).join(', '), false);
+                // Reload to show new masked key
+                await loadAdminStats();
+                // Clear API key input after save
+                const keyInp = document.getElementById('aiApiKeyInput');
+                if (keyInp) keyInp.value = '';
+            } else {
+                showAiMsg('❌ ' + (j.error || 'Save failed'), true);
+            }
+        } catch(e) {
+            showAiMsg('❌ Network error: ' + e.message, true);
+        }
+    }
+
+    async function testAiKey() {
+        const btn  = document.getElementById('aiTestBtn');
+        const key  = document.getElementById('aiApiKeyInput')?.value.trim();
+        const model= document.getElementById('aiModelSelect')?.value;
+        if (btn) { btn.textContent = '⏳ Testing...'; btn.disabled = true; }
+        try {
+            const idToken = await getToken();
+            const body = { groq_model: model };
+            if (key) body.groq_api_key = key;
+            const res = await fetch('/api/admin/ai-settings/test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+                body: JSON.stringify(body)
+            });
+            const j = await res.json();
+            if (j.success) {
+                showAiMsg(j.message || '✅ API key works!', false);
+            } else {
+                showAiMsg('❌ ' + (j.error || 'Test failed'), true);
+            }
+        } catch(e) {
+            showAiMsg('❌ ' + e.message, true);
+        } finally {
+            if (btn) { btn.textContent = '🧪 Test API Key'; btn.disabled = false; }
+        }
+    }
+    // ─────────────────────────────────────────────────────────
+
+    async function saveToggleSetting(key, value) {
+        try {
+            const idToken = await getToken();
+            const res = await fetch('/api/admin/settings', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+                body: JSON.stringify({ [key]: value })
+            });
+            const j = await res.json();
+            if (!j.success) alert('❌ Failed to save setting: ' + (j.error || ''));
+        } catch(e) { alert('❌ ' + e.message); }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const mt = document.getElementById('maintToggle');
+        if (mt) mt.addEventListener('change', () => saveToggleSetting('maintenance', mt.checked));
+
+        const et = document.getElementById('engineToggle');
+        if (et) et.addEventListener('change', () => saveToggleSetting('autoEngine', et.checked));
+
+        const rt = document.getElementById('regToggle');
+        if (rt) rt.addEventListener('change', () => saveToggleSetting('allowRegistrations', rt.checked));
+    });
+
+    // ── Users plan filter ───────────────────────────────────
+    function filterUsersByPlan(plan) {
+        const rows = document.querySelectorAll('#userTable tbody tr');
+        rows.forEach(row => {
+            if (!plan) { row.style.display = ''; return; }
+            row.style.display = row.textContent.toLowerCase().includes(plan) ? '' : 'none';
+        });
+    }
+
+
+
+
+
+    // ── Balance Requests ──────────────────────────────────────
+    async function loadBalanceRequests() {
+        const tbody = document.getElementById('balReqTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted);">Loading...</td></tr>';
+        try {
+            const tok = await getToken();
+            const r = await fetch('/api/admin/balance-requests', { headers:{Authorization:'Bearer '+tok} });
+            const d = await r.json();
+            if (!d.success) { tbody.innerHTML = '<tr><td colspan="7" style="color:var(--red);padding:16px;">Failed.</td></tr>'; return; }
+
+            const badge = document.getElementById('balReqBadge');
+            if (badge) { badge.textContent = d.pending; badge.style.display = d.pending > 0 ? '' : 'none'; }
+
+            if (!d.data.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">No requests.</td></tr>'; return; }
+
+            tbody.innerHTML = d.data.map(r => `
+                <tr>
+                    <td><div style="font-size:0.8rem;">${r.displayName||'—'}</div><div style="font-size:0.68rem;color:var(--text-muted);">${r.userEmail}</div></td>
+                    <td><span class="badge badge-${r.requestType==='RESET'?'warn':'info'}">${r.requestType}</span></td>
+                    <td style="font-family:monospace;">$${(r.currentBalance||0).toLocaleString()}</td>
+                    <td style="font-family:monospace;font-weight:700;color:var(--green);">$${(r.requestedAmount||0).toLocaleString()}</td>
+                    <td style="font-size:0.75rem;max-width:200px;">${r.reason||'—'}</td>
+                    <td style="font-size:0.72rem;color:var(--text-muted);">${new Date(r.createdAt).toLocaleDateString()}</td>
+                    <td>
+                        ${r.status==='pending' ? `
+                        <div style="display:flex;gap:6px;">
+                            <button class="btn btn-success btn-sm" onclick="processBalReq('${r._id}','approve')">✅ Approve</button>
+                            <button class="btn btn-danger btn-sm" onclick="processBalReq('${r._id}','reject')">❌ Reject</button>
+                        </div>` : `<span class="badge badge-${r.status==='approved'?'success':'warn'}">${r.status}</span>`}
+                    </td>
+                </tr>
+            `).join('');
+        } catch(e) { tbody.innerHTML = '<tr><td colspan="7" style="color:var(--red);">Error.</td></tr>'; }
+    }
+
+    async function processBalReq(id, action) {
+        const note = action==='reject' ? prompt('Rejection reason (optional):') : null;
+        const tok = await getToken();
+        try {
+            const r = await fetch(`/api/admin/balance-requests/${id}`, {
+                method:'PATCH',
+                headers:{'Content-Type':'application/json',Authorization:'Bearer '+tok},
+                body: JSON.stringify({ action, adminNote: note||'' })
+            });
+            const d = await r.json();
+            if (d.success) { showToast(action==='approve'?'✅ Approved!':'❌ Rejected'); loadBalanceRequests(); }
+            else showToast(d.error||'Failed.','error');
+        } catch(e) { showToast('Error','error'); }
+    }
+
+</script>
+</body>
+</html>

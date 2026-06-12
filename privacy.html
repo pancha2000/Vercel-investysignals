@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Privacy Policy | InvestySignals</title>
+    <meta name="description" content="InvestySignals Privacy Policy - How we collect, use, and protect your personal data. GDPR compliant.">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .page-hero {
+            padding: 160px 24px 80px;
+            text-align: center;
+            background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
+            border-bottom: 1px solid var(--border-soft);
+        }
+        .page-hero h1 { font-size: 3rem; margin-bottom: 16px; }
+        .page-hero p {
+            color: var(--text-muted);
+            font-size: 1.125rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .legal-wrapper {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 60px 24px 100px;
+            gap: 60px;
+            align-items: start;
+        }
+        .toc {
+            position: sticky;
+            top: 100px;
+            background: var(--bg2);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-sm);
+            padding: 24px;
+        }
+        .toc-title {
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 16px;
+        }
+        .toc a {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            padding: 6px 0;
+            text-decoration: none;
+            border-left: 2px solid transparent;
+            padding-left: 10px;
+            transition: var(--transition);
+        }
+        .toc a:hover { color: var(--text); border-left-color: var(--gold); }
+        .legal-content {
+            color: var(--text-muted);
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+        .legal-content h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--text);
+            font-size: 1.5rem;
+            margin: 48px 0 16px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border-soft);
+        }
+        .legal-content h2:first-of-type { border-top: none; margin-top: 0; }
+        .legal-content p { margin-bottom: 20px; }
+        .legal-content ul { margin-bottom: 20px; padding-left: 24px; }
+        .legal-content li { margin-bottom: 10px; }
+        .legal-content a { color: var(--gold); text-decoration: none; }
+        .legal-content a:hover { text-decoration: underline; }
+        .last-updated {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            color: var(--gold);
+            margin-bottom: 40px;
+            padding: 12px 16px;
+            background: rgba(212,175,55,0.06);
+            border: 1px solid rgba(212,175,55,0.2);
+            border-radius: var(--radius-sm);
+            display: inline-block;
+        }
+        .highlight-box {
+            background: rgba(212,175,55,0.06);
+            border-left: 3px solid var(--gold);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+        .contact-inline {
+            background: var(--bg2);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-sm);
+            padding: 20px 24px;
+            margin-top: 16px;
+        }
+        .contact-inline strong { color: var(--text); }
+        @media (max-width: 900px) {
+            .legal-wrapper { grid-template-columns: 1fr; }
+            .toc { display: none; }
+        }
+    </style>
+    <!-- Google AdSense Auto Ads -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5034247623532581"
+         crossorigin="anonymous"></script>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">◈</span>
+                INVESTY<span class="logo-accent">SIGNALS</span>
+            </a>
+            <div class="nav-links">
+                <a href="signals.html">Signals</a>
+                <a href="about.html">About</a>
+                <a href="pricing.html">Pricing</a>
+                <a href="contact.html">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <a href="login.html" class="btn btn-ghost">Log In</a>
+                <a href="register.html" class="btn btn-gold">Get Started →</a>
+            </div>
+            <button class="hamburger" id="hamburger">☰</button>
+        </div>
+    </nav>
+    <div class="mobile-drawer" id="mobileDrawer">
+        <button class="drawer-close" id="drawerClose">×</button>
+        <div class="drawer-nav">
+            <a href="signals.html">Signals</a>
+            <a href="about.html">About</a>
+            <a href="pricing.html">Pricing</a>
+            <a href="contact.html">Contact</a>
+        </div>
+        <div class="drawer-actions">
+            <a href="login.html" class="btn btn-ghost" style="width:100%;">Log In</a>
+            <a href="register.html" class="btn btn-gold" style="width:100%;">Get Started →</a>
+        </div>
+    </div>
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+
+    <div class="page-hero">
+        <h1>Privacy Policy</h1>
+        <p>We are committed to protecting your privacy and being transparent about how we handle your data.</p>
+    </div>
+
+    <div class="legal-wrapper">
+        <!-- Table of Contents -->
+        <nav class="toc">
+            <div class="toc-title">Contents</div>
+            <a href="#info-collect">1. Information We Collect</a>
+            <a href="#how-use">2. How We Use Your Information</a>
+            <a href="#advertising">3. Advertising & Google AdSense</a>
+            <a href="#cookies">4. Cookies & Tracking</a>
+            <a href="#third-party">5. Third-Party Services</a>
+            <a href="#data-security">6. Data Security</a>
+            <a href="#your-rights">7. Your Rights</a>
+            <a href="#children">8. Children's Privacy</a>
+            <a href="#international">9. International Data Transfers</a>
+            <a href="#changes">10. Changes to This Policy</a>
+            <a href="#contact-privacy">11. Contact Us</a>
+        </nav>
+
+        <div class="legal-content">
+            <div class="last-updated">Last Updated: June 6, 2026</div>
+
+            <div class="highlight-box">
+                This Privacy Policy applies to <strong>investysignals.store</strong> ("InvestySignals", "we", "our", or "us"), operated by <strong>Shehan Vimukthi</strong>. By using our website, you agree to the collection and use of information in accordance with this policy.
+            </div>
+
+            <h2 id="info-collect">1. Information We Collect</h2>
+            <p>We collect the following types of information when you use InvestySignals:</p>
+            <ul>
+                <li><strong>Account Information:</strong> When you register, we collect your display name and email address. Authentication is handled securely via Google Firebase Auth — we do not store passwords on our own servers.</li>
+                <li><strong>Usage Data:</strong> We may collect information about how you interact with our platform, including pages visited, signals viewed, and features used.</li>
+                <li><strong>Device & Technical Data:</strong> IP address, browser type, operating system, and referring URLs, collected automatically when you visit our site.</li>
+                <li><strong>Paper Trading Data:</strong> Mock trading history is stored locally in your browser via localStorage and is not transmitted to our servers.</li>
+                <li><strong>Communications:</strong> If you contact us via our contact form or email, we retain that correspondence to respond to your inquiry.</li>
+            </ul>
+
+            <h2 id="how-use">2. How We Use Your Information</h2>
+            <p>We use the information we collect to:</p>
+            <ul>
+                <li>Provide, operate, and maintain the InvestySignals platform</li>
+                <li>Manage your user account and authenticate your identity</li>
+                <li>Send service-related communications (account updates, security alerts)</li>
+                <li>Respond to your inquiries and support requests</li>
+                <li>Analyze usage patterns to improve our platform</li>
+                <li>Serve relevant advertisements through Google AdSense</li>
+                <li>Comply with legal obligations</li>
+            </ul>
+            <p><strong>We do not sell your personal data to third parties.</strong></p>
+
+            <h2 id="advertising">3. Advertising & Google AdSense</h2>
+            <p>InvestySignals uses <strong>Google AdSense</strong> to display advertisements on our website. Google AdSense is a third-party advertising service provided by Google LLC.</p>
+            <p>Google AdSense may use cookies and web beacons to collect data about your visits to this and other websites to provide relevant advertisements. This includes:</p>
+            <ul>
+                <li>Cookies stored on your device to serve personalized or interest-based ads</li>
+                <li>Data collected by the DoubleClick cookie (used for ad conversion tracking)</li>
+                <li>Aggregate anonymized data about user behavior for ad optimization</li>
+            </ul>
+            <div class="highlight-box">
+                <strong>Opt-Out Options:</strong> You can opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener">Google's Ads Settings</a>. You may also opt out through the <a href="http://www.networkadvertising.org/managing/opt_out.asp" target="_blank" rel="noopener">Network Advertising Initiative opt-out page</a>.
+            </div>
+            <p>Our publisher ID with Google AdSense is <strong>pub-5034247623532581</strong>. Our ads.txt file is publicly available at <a href="/ads.txt">investysignals.store/ads.txt</a> to verify our authorized sellers.</p>
+            <p>For more information on how Google uses data from sites that use their advertising services, visit: <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">How Google uses data when you use our partners' sites or apps</a>.</p>
+
+            <h2 id="cookies">4. Cookies & Tracking Technologies</h2>
+            <p>We use the following types of cookies on InvestySignals:</p>
+            <ul>
+                <li><strong>Essential Cookies:</strong> Required for the website to function, including maintaining your login session via JSON Web Tokens (JWT) and Firebase Auth session tokens.</li>
+                <li><strong>Analytics Cookies:</strong> Used to understand how visitors interact with our website to improve user experience.</li>
+                <li><strong>Advertising Cookies:</strong> Set by Google AdSense to deliver relevant ads and measure their performance. These may include the Google DoubleClick cookie and similar technologies.</li>
+            </ul>
+            <p>You can control cookies through your browser settings. Note that disabling certain cookies may affect the functionality of our platform. For more details on managing cookies, visit <a href="https://www.allaboutcookies.org" target="_blank" rel="noopener">allaboutcookies.org</a>.</p>
+
+            <h2 id="third-party">5. Third-Party Services</h2>
+            <p>We work with the following third-party services, each with their own privacy policies:</p>
+            <ul>
+                <li><strong>Google Firebase</strong> — Authentication, database, and cloud functions. <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebase Privacy Policy</a></li>
+                <li><strong>Google AdSense</strong> — Advertising services. <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a></li>
+                <li><strong>Payment Partners</strong> — If applicable, payment processing is handled by our secure payment partners. We do not store full credit card or payment details on our servers.</li>
+            </ul>
+            <p>Our VPS server infrastructure is hosted in <strong>Singapore</strong>. Data processed on our servers may therefore be subject to Singaporean data protection laws in addition to applicable local laws.</p>
+
+            <h2 id="data-security">6. Data Security</h2>
+            <p>We implement industry-standard security measures to protect your personal information:</p>
+            <ul>
+                <li>All communication between your browser and our servers is encrypted using <strong>HTTPS/TLS</strong></li>
+                <li>Passwords are never stored on our servers — authentication is managed entirely by Firebase Auth</li>
+                <li>Access to user data is strictly limited to authorized personnel</li>
+                <li>Regular security reviews of our platform and infrastructure</li>
+            </ul>
+            <p>While we take reasonable steps to protect your data, no method of internet transmission or electronic storage is 100% secure. We cannot guarantee absolute security.</p>
+
+            <h2 id="your-rights">7. Your Rights</h2>
+            <p>Depending on your location, you may have the following rights regarding your personal data:</p>
+            <ul>
+                <li><strong>Access:</strong> Request a copy of the personal data we hold about you</li>
+                <li><strong>Correction:</strong> Request correction of inaccurate or incomplete data</li>
+                <li><strong>Deletion:</strong> Request deletion of your personal data ("right to be forgotten")</li>
+                <li><strong>Portability:</strong> Request your data in a portable, machine-readable format</li>
+                <li><strong>Objection:</strong> Object to our processing of your data for direct marketing or advertising purposes</li>
+                <li><strong>Withdrawal of Consent:</strong> Withdraw consent at any time where processing is based on consent</li>
+            </ul>
+            <p>You can manage your account information from your Profile settings page. To exercise any of the above rights or to request full account deletion, contact us at <a href="mailto:investysignals@gmail.com">investysignals@gmail.com</a>.</p>
+
+            <h2 id="children">8. Children's Privacy</h2>
+            <p>InvestySignals is not intended for use by individuals under the age of <strong>18 years</strong>. We do not knowingly collect personal information from children under 18. If you are a parent or guardian and believe your child has provided us with personal information, please contact us immediately at <a href="mailto:investysignals@gmail.com">investysignals@gmail.com</a> and we will take steps to delete that information.</p>
+
+            <h2 id="international">9. International Data Transfers</h2>
+            <p>InvestySignals is operated from <strong>Sri Lanka</strong> with server infrastructure located in <strong>Singapore</strong>. By using our platform, you consent to the transfer of your information to these locations. Google Firebase and Google AdSense may also process your data in countries outside your own in accordance with their respective privacy policies.</p>
+            <p>We ensure that any international transfers of personal data comply with applicable data protection laws and are subject to appropriate safeguards.</p>
+
+            <h2 id="changes">10. Changes to This Policy</h2>
+            <p>We may update this Privacy Policy from time to time to reflect changes in our practices, technology, legal requirements, or other factors. When we make material changes, we will:</p>
+            <ul>
+                <li>Update the "Last Updated" date at the top of this policy</li>
+                <li>Post a prominent notice on our website</li>
+                <li>Send an email notification to registered users for significant changes</li>
+            </ul>
+            <p>We encourage you to review this Privacy Policy periodically. Your continued use of InvestySignals after any changes constitutes acceptance of the updated policy.</p>
+
+            <h2 id="contact-privacy">11. Contact Us</h2>
+            <p>If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us:</p>
+            <div class="contact-inline">
+                <p style="margin:0;"><strong>InvestySignals</strong><br>
+                Operated by: <strong>Shehan Vimukthi</strong><br>
+                Website: <a href="https://investysignals.store">investysignals.store</a><br>
+                Email: <a href="mailto:investysignals@gmail.com">investysignals@gmail.com</a><br>
+                Country: Sri Lanka 🇱🇰</p>
+            </div>
+            <p style="margin-top:20px;">We will respond to all privacy-related inquiries within <strong>48 hours</strong>.</p>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col" style="grid-column: span 1;">
+                    <a href="index.html" class="logo mb-2">
+                        <span class="logo-icon">◈</span> INVESTY<span class="logo-accent">SIGNALS</span>
+                    </a>
+                    <p style="color:var(--text-muted);font-size:0.875rem;">Sri Lanka's leading crypto signal platform. Empowering retail traders with institutional-grade tools.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Platform</h4>
+                    <ul class="footer-links">
+                        <li><a href="signals.html">Live Signals</a></li>
+                        <li><a href="login.html">Analysis Engine</a></li>
+                        <li><a href="login.html">Paper Trading</a></li>
+                        <li><a href="login.html">Dashboard</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <ul class="footer-links">
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="pricing.html">Pricing</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="terms.html">Terms of Service</a></li>
+                        <li><a href="privacy.html">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div>© 2026 InvestySignals. All rights reserved.</div>
+                <div>Educational purposes only. Not financial advice.</div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const hamburger = document.getElementById('hamburger');
+        const drawerClose = document.getElementById('drawerClose');
+        const mobileDrawer = document.getElementById('mobileDrawer');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        function toggleDrawer() {
+            mobileDrawer.classList.toggle('open');
+            drawerOverlay.classList.toggle('open');
+        }
+        hamburger.addEventListener('click', toggleDrawer);
+        drawerClose.addEventListener('click', toggleDrawer);
+        drawerOverlay.addEventListener('click', toggleDrawer);
+
+        // Smooth scroll for TOC
+        document.querySelectorAll('.toc a').forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        // Highlight active TOC item on scroll
+        const sections = document.querySelectorAll('.legal-content h2[id]');
+        const tocLinks = document.querySelectorAll('.toc a');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(sec => {
+                if (window.scrollY >= sec.offsetTop - 140) current = sec.id;
+            });
+            tocLinks.forEach(link => {
+                link.style.color = link.getAttribute('href') === '#' + current ? 'var(--gold)' : '';
+                link.style.borderLeftColor = link.getAttribute('href') === '#' + current ? 'var(--gold)' : 'transparent';
+            });
+        });
+    </script>
+</body>
+</html>

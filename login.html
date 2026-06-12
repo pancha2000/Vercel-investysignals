@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Login | InvestySignals</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { overflow-y: auto; }
+        .auth-layout {
+            min-height: 100vh;
+            display: flex;
+        }
+        /* Left panel */
+        .auth-left {
+            width: 42%;
+            background: var(--bg2);
+            border-right: 1px solid var(--border-soft);
+            display: flex; flex-direction: column;
+            justify-content: space-between;
+            padding: 40px;
+            position: relative; overflow: hidden;
+        }
+        .auth-left::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+        .auth-orb {
+            position: absolute;
+            border-radius: 50%; filter: blur(70px); pointer-events: none;
+        }
+        .ao-1 {
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(240,180,41,0.14) 0%, transparent 70%);
+            top: 20%; left: -10%;
+        }
+        .ao-2 {
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(0,217,126,0.08) 0%, transparent 70%);
+            bottom: 15%; right: -5%;
+        }
+        .auth-left-content { position: relative; z-index: 1; }
+        .auth-left h2 {
+            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+            margin-bottom: 16px; line-height: 1.25;
+        }
+        .auth-left p { color: var(--text-muted); font-size: 0.92rem; line-height: 1.7; margin-bottom: 36px; }
+
+        .stat-cards { display: flex; flex-direction: column; gap: 12px; }
+        .stat-float {
+            background: rgba(10,13,24,0.7);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-sm);
+            padding: 14px 18px;
+            backdrop-filter: blur(10px);
+            animation: floatCard 6s ease-in-out infinite;
+            display: flex; align-items: center; gap: 14px;
+        }
+        .stat-float:nth-child(2) { animation-delay: 2s; margin-left: 24px; }
+        .stat-float:nth-child(3) { animation-delay: 4s; margin-left: 12px; }
+        @keyframes floatCard {
+            0%,100%{ transform: translateY(0); }
+            50%{ transform: translateY(-8px); }
+        }
+        .sf-icon {
+            width: 36px; height: 36px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; flex-shrink: 0;
+        }
+        .sf-lbl { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 2px; }
+        .sf-val { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 700; }
+
+        .auth-testimonial {
+            position: relative; z-index: 1;
+            background: rgba(240,180,41,0.06);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 18px;
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .auth-testimonial::before { content: '"'; font-size: 2rem; color: var(--gold); line-height: 0.5; display: block; margin-bottom: 8px; }
+        .testimonial-author { margin-top: 10px; font-size: 0.8rem; color: var(--gold); font-style: normal; font-weight: 600; }
+
+        /* Right panel */
+        .auth-right {
+            flex: 1;
+            display: flex; align-items: center; justify-content: center;
+            padding: 40px 32px;
+            background: var(--bg);
+            position: relative;
+        }
+        .auth-right::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(240,180,41,0.04) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .auth-card {
+            width: 100%; max-width: 440px;
+            background: var(--bg2);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius);
+            padding: 36px 32px;
+            position: relative; z-index: 1;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+        }
+        .auth-card-header { text-align: center; margin-bottom: 28px; }
+        .auth-card-header h1 { font-size: 1.7rem; margin-bottom: 6px; }
+        .auth-card-header p { color: var(--text-muted); font-size: 0.88rem; }
+
+        .error-box {
+            background: var(--red-glow);
+            border: 1px solid rgba(255,59,92,0.25);
+            color: var(--red);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .pw-wrap { position: relative; }
+        .pw-eye {
+            position: absolute; right: 14px; top: 50%;
+            transform: translateY(-50%);
+            background: none; border: none;
+            color: var(--text-muted); cursor: pointer;
+            font-size: 0.82rem; padding: 4px;
+            transition: var(--transition);
+        }
+        .pw-eye:hover { color: var(--text); }
+
+        .auth-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .check-group { display: flex; align-items: center; gap: 7px; }
+        .check-group input { accent-color: var(--gold); width: 15px; height: 15px; }
+        .check-group label { font-size: 0.85rem; color: var(--text-muted); }
+        .forgot-link { font-size: 0.85rem; color: var(--gold); transition: var(--transition); }
+        .forgot-link:hover { color: var(--gold-bright); }
+
+        .auth-divider {
+            display: flex; align-items: center;
+            margin: 20px 0; color: var(--text-muted); font-size: 0.8rem;
+        }
+        .auth-divider::before, .auth-divider::after {
+            content: ''; flex: 1; height: 1px; background: var(--border-soft);
+        }
+        .auth-divider::before { margin-right: 12px; }
+        .auth-divider::after  { margin-left:  12px; }
+
+        .auth-footer { text-align: center; margin-top: 20px; font-size: 0.875rem; color: var(--text-muted); }
+        .auth-footer a { color: var(--gold); font-weight: 600; }
+        .auth-footer a:hover { color: var(--gold-bright); }
+
+        .btn-loading { opacity: 0.7; pointer-events: none; }
+
+        @media (max-width: 900px) {
+            .auth-left { display: none; }
+            .auth-right { padding: 24px 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="auth-layout">
+    <!-- Left -->
+    <div class="auth-left">
+        <div class="auth-left-content">
+            <a href="index.html" class="logo" style="font-size:0.95rem;margin-bottom:48px;display:inline-flex;">
+                <div class="logo-icon" style="width:28px;height:28px;font-size:0.85rem;">◈</div>
+                <span>INVESTY<span class="logo-accent">SIGNALS</span></span>
+            </a>
+        </div>
+        <div class="auth-orb ao-1"></div>
+        <div class="auth-orb ao-2"></div>
+        <div class="auth-left-content">
+            <div class="stat-cards">
+                <div class="stat-float">
+                    <div class="sf-icon fi-gold">📊</div>
+                    <div>
+                        <div class="sf-lbl">30-Day Win Rate</div>
+                        <div class="sf-val text-gold">78.2%</div>
+                    </div>
+                </div>
+                <div class="stat-float">
+                    <div class="sf-icon fi-green">✅</div>
+                    <div>
+                        <div class="sf-lbl">Total Signals</div>
+                        <div class="sf-val text-green">1,254+</div>
+                    </div>
+                </div>
+                <div class="stat-float">
+                    <div class="sf-icon fi-blue">👥</div>
+                    <div>
+                        <div class="sf-lbl">Active Traders</div>
+                        <div class="sf-val" style="color:var(--blue)">15,000+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="auth-left-content">
+            <h2>Institutional-grade signals. Zero cost.</h2>
+            <p>Join thousands of Sri Lankan traders using our 16-factor confluence engine to consistently beat the market.</p>
+            <div class="auth-testimonial">
+                InvestySignals completely changed how I trade. The signal quality is unlike anything I've seen at this price point.
+                <div class="testimonial-author">— Kasun P., Elite Member</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right -->
+    <div class="auth-right">
+        <div class="auth-card fade-up visible">
+            <div class="auth-card-header">
+                <a href="index.html" class="logo" style="font-size:0.9rem;justify-content:center;margin-bottom:20px;display:inline-flex;">
+                    <div class="logo-icon" style="width:26px;height:26px;font-size:0.85rem;">◈</div>
+                    <span>INVESTY<span class="logo-accent">SIGNALS</span></span>
+                </a>
+                <h1>Welcome Back</h1>
+                <p>Sign in to your trading account</p>
+            </div>
+
+            <div class="error-box" id="errorBox">Invalid email or password. Please try again.</div>
+
+            <div id="loginForm">
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" class="input-control" id="email" placeholder="you@example.com" autocomplete="email">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <div class="pw-wrap">
+                        <input type="password" class="input-control" id="password" placeholder="••••••••" autocomplete="current-password" style="padding-right:50px;">
+                        <button class="pw-eye" id="togglePw" type="button">Show</button>
+                    </div>
+                </div>
+                <div class="auth-actions">
+                    <div class="check-group">
+                        <input type="checkbox" id="remember">
+                        <label for="remember">Remember me</label>
+                    </div>
+                    <a href="#" class="forgot-link" id="forgotLink">Forgot password?</a>
+                </div>
+                <button class="btn btn-gold" style="width:100%;justify-content:center;" id="loginBtn" onclick="handleLogin()">
+                    Sign In →
+                </button>
+                <div class="auth-divider">or continue with</div>
+                <button class="btn btn-surface" style="width:100%;justify-content:center;gap:10px;" onclick="handleGoogle()">
+                    <svg width="17" height="17" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                    Continue with Google
+                </button>
+            </div>
+
+            <div class="auth-footer">
+                Don't have an account? <a href="register.html">Create one free →</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA49TYbX5omoN56bffDnlqZGGjjpKZtOvk",
+        authDomain: "investysignals-890ba.firebaseapp.com",
+        projectId: "investysignals-890ba",
+        storageBucket: "investysignals-890ba.firebasestorage.app",
+        messagingSenderId: "1045281522975",
+        appId: "1:1045281522975:web:47c4b8d32c5f235a7bdc2a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    // Password toggle
+    document.getElementById('togglePw').addEventListener('click', () => {
+        const pw = document.getElementById('password');
+        const btn = document.getElementById('togglePw');
+        if (pw.type === 'password') { pw.type = 'text'; btn.textContent = 'Hide'; }
+        else { pw.type = 'password'; btn.textContent = 'Show'; }
+    });
+
+    window.handleLogin = async function() {
+        const email = document.getElementById('email').value.trim();
+        const pw    = document.getElementById('password').value;
+        const btn   = document.getElementById('loginBtn');
+        const errBox= document.getElementById('errorBox');
+        errBox.style.display = 'none';
+        if (!email || !pw) { errBox.textContent = 'Please fill in all fields.'; errBox.style.display = 'block'; return; }
+        btn.textContent = 'Signing in...'; btn.classList.add('btn-loading');
+        try {
+            const cred = await signInWithEmailAndPassword(auth, email, pw);
+            sessionStorage.setItem('user', JSON.stringify({ email: cred.user.email, name: cred.user.displayName }));
+            // FIX #3: uid is now derived from token server-side — no uid query param
+            try {
+                const idToken = await cred.user.getIdToken();
+                const sr = await fetch('/api/user/status', {
+                    headers: { 'Authorization': 'Bearer ' + idToken }
+                });
+                const sj = await sr.json();
+                if (sj.success && sj.status.role === 'admin') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
+            } catch(_) {
+                window.location.href = 'dashboard.html';
+            }
+        } catch(e) {
+            errBox.textContent = 'Invalid email or password.';
+            errBox.style.display = 'block';
+            btn.textContent = 'Sign In →'; btn.classList.remove('btn-loading');
+        }
+    };
+
+    window.handleGoogle = async function() {
+        try {
+            const cred = await signInWithPopup(auth, provider);
+            sessionStorage.setItem('user', JSON.stringify({ email: cred.user.email, name: cred.user.displayName }));
+            window.location.href = 'dashboard.html';
+        } catch(e) {
+            document.getElementById('errorBox').textContent = 'Google sign-in failed.';
+            document.getElementById('errorBox').style.display = 'block';
+        }
+    };
+
+    // Enter key submit
+    document.addEventListener('keydown', e => { if(e.key === 'Enter') handleLogin(); });
+
+    // Forgot Password handler
+    document.getElementById('forgotLink').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value.trim();
+        const errBox = document.getElementById('errorBox');
+        if (!email) {
+            errBox.textContent = 'Please enter your email address first, then click Forgot password.';
+            errBox.style.display = 'block';
+            errBox.style.color = '#f0b429';
+            return;
+        }
+        try {
+            await sendPasswordResetEmail(auth, email);
+            errBox.textContent = '✅ Password reset email sent! Check your inbox.';
+            errBox.style.display = 'block';
+            errBox.style.color = '#22c55e';
+        } catch(err) {
+            errBox.textContent = 'Could not send reset email. Check your email address.';
+            errBox.style.display = 'block';
+            errBox.style.color = '#ff3d5a';
+        }
+    });
+</script>
+</body>
+</html>

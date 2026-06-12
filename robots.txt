@@ -1,0 +1,8 @@
+# InvestySignals — robots.txt
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin*
+Disallow: /serviceAccount.json
+
+Sitemap: https://investysignals.store/sitemap.xml

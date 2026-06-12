@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Signals | InvestySignals</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .summary-bar {
+            background: var(--bg2); border: 1px solid var(--border-soft);
+            border-radius: var(--radius); padding: 16px 24px;
+            display: flex; gap: 0;
+            margin-bottom: 20px; overflow: hidden;
+        }
+        .sum-item {
+            flex: 1; text-align: center;
+            padding: 8px 16px;
+            border-right: 1px solid var(--border-soft);
+        }
+        .sum-item:last-child { border-right: none; }
+        .sum-lbl { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; }
+        .sum-val { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700; }
+
+        .filter-row { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
+        .pill { background: var(--surface); border: 1px solid var(--border-soft); color: var(--text-muted); padding: 7px 16px; border-radius: 100px; font-size: 0.82rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: var(--transition); font-family: 'Space Grotesk', sans-serif; }
+        .pill:hover { border-color: var(--gold); color: var(--text); }
+        .pill.active { background: var(--gold); color: var(--bg); border-color: var(--gold); }
+
+        .signals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+            gap: 16px;
+        }
+
+        .sig-card-full {
+            background: var(--bg2);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius);
+            padding: 0;
+            overflow: hidden;
+            transition: var(--transition);
+            position: relative;
+        }
+        .sig-card-full::before {
+            content: '';
+            position: absolute; left: 0; top: 0; bottom: 0;
+            width: 3px;
+        }
+        .sig-long::before  { background: var(--green); }
+        .sig-short::before { background: var(--red); }
+        .sig-card-full:hover { border-color: var(--border); transform: translateY(-3px); box-shadow: var(--shadow-card); }
+
+        .scf-head {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            padding: 16px 18px 12px;
+            border-bottom: 1px solid var(--border-soft);
+        }
+        .scf-pair { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 700; }
+        .scf-meta { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+        .scf-badges { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+
+        .scf-prices {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 0; border-bottom: 1px solid var(--border-soft);
+        }
+        .price-cell {
+            padding: 12px 14px; text-align: center;
+            border-right: 1px solid var(--border-soft);
+        }
+        .price-cell:last-child { border-right: none; }
+        .pc-lbl { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 4px; }
+        .pc-val { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; }
+
+        .scf-score {
+            padding: 10px 18px;
+            display: flex; align-items: center; gap: 10px;
+            background: var(--bg3);
+        }
+        .score-track { flex: 1; height: 5px; background: var(--surface); border-radius: 3px; overflow: hidden; }
+        .score-fill   { height: 100%; border-radius: 3px; }
+        .scf-footer { padding: 10px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 0.78rem; }
+
+        .empty-state {
+            background: var(--bg2); border: 1px solid var(--border-soft);
+            border-radius: var(--radius); padding: 80px 24px; text-align: center;
+        }
+        .empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.4; }
+        .empty-state h3 { margin-bottom: 8px; }
+        .empty-state p  { color: var(--text-muted); font-size: 0.9rem; max-width: 400px; margin: 0 auto; }
+
+        @media (max-width: 768px) {
+            .signals-grid { grid-template-columns: 1fr; }
+            .summary-bar { overflow-x: auto; flex-wrap: nowrap; }
+            .sum-item { min-width: 100px; }
+        }
+    </style>
+<!-- Google AdSense Auto Ads -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5034247623532581"
+     crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="nav-backdrop" id="navBackdrop"></div>
+    <nav class="auth-nav">
+    <div class="auth-nav-left">
+        <button class="auth-hamburger" id="authHamburger">☰</button>
+        <a href="index.html" class="logo" style="font-size:0.9rem;">
+            <div class="logo-icon" style="width:26px;height:26px;font-size:0.85rem;">◈</div>
+            <span>INVESTY<span class="logo-accent">SIGNALS</span></span>
+        </a>
+    </div>
+    <nav class="auth-nav-menu" id="authNavMenu">
+        <a href="dashboard.html" class="auth-nav-link">📊 Dashboard</a>
+        <a href="signals.html" class="auth-nav-link active">⚡ Signals</a>
+        <a href="analysis.html" class="auth-nav-link">🧠 Analysis</a>
+        <a href="live-signals.html" class="auth-nav-link">🔴 Live</a>
+        <a href="profile.html" class="auth-nav-link">👤 Profile</a>
+        <a class="auth-nav-link" style="color:var(--red,#ff4d4f);cursor:pointer;" id="sidebarLogout">🔓 Log Out</a>
+    </nav>
+    <div class="auth-nav-right">
+        <span class="badge badge-green live-dot">Live</span>
+        <div class="user-chip-wrap" id="userChipWrap">
+            <div class="user-chip" id="userChipBtn" style="cursor:pointer;">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <span class="user-name" id="userName">User</span>
+                <span style="font-size:0.65rem;color:var(--text-muted);margin-left:2px;">▾</span>
+            </div>
+            <div class="user-dropdown" id="userDropdown">
+                <a href="profile.html" class="ud-item">👤 Profile</a>
+                <div style="height:1px;background:var(--border-soft);margin:4px 0;"></div>
+                <a class="ud-item ud-danger" id="dropdownLogout">🔓 Log Out</a>
+            </div>
+        </div>
+        <button id="logoutBtn" class="btn btn-surface btn-sm">Logout</button>
+    </div>
+</nav>
+
+<div class="dash-container">
+    <div class="flex-between mb-3">
+        <div>
+            <h1 style="font-size:1.6rem;margin-bottom:4px;">⚡ Trading Signals</h1>
+            <p style="color:var(--text-muted);font-size:0.875rem;">High-probability setups from the 16-factor confluence engine</p>
+        </div>
+        <span class="badge badge-green live-dot" style="font-size:0.72rem;">Engine Online</span>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary-bar">
+        <div class="sum-item"><div class="sum-lbl">Total</div><div class="sum-val" id="totalCount">0</div></div>
+        <div class="sum-item"><div class="sum-lbl">Long</div><div class="sum-val text-green" id="longCount">0</div></div>
+        <div class="sum-item"><div class="sum-lbl">Short</div><div class="sum-val text-red" id="shortCount">0</div></div>
+        <div class="sum-item"><div class="sum-lbl">Active</div><div class="sum-val" style="color:var(--blue)" id="activeCount">0</div></div>
+        <div class="sum-item"><div class="sum-lbl">Win Rate</div><div class="sum-val text-gold" id="winRateDisplay">—</div></div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-row mb-3">
+        <button class="pill active" onclick="filterSig('all',this)">All</button>
+        <button class="pill" onclick="filterSig('long',this)">🟢 Long</button>
+        <button class="pill" onclick="filterSig('short',this)">🔴 Short</button>
+        <button class="pill" onclick="filterSig('active',this)">Active</button>
+        <button class="pill" onclick="filterSig('tp',this)">TP Hit</button>
+        <button class="pill" onclick="filterSig('high',this)">Score 80+</button>
+    </div>
+
+    <!-- Grid -->
+    <div class="signals-grid" id="signalsGrid"></div>
+    <div class="empty-state" id="emptyState" style="display:none;">
+        <div class="empty-icon">📡</div>
+        <h3>No signals found</h3>
+        <p>No signals match the selected filter. Try a different category or check back soon.</p>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    const app = initializeApp({ apiKey:"AIzaSyA49TYbX5omoN56bffDnlqZGGjjpKZtOvk", authDomain:"investysignals-890ba.firebaseapp.com", projectId:"investysignals-890ba", storageBucket:"investysignals-890ba.firebasestorage.app", messagingSenderId:"1045281522975", appId:"1:1045281522975:web:47c4b8d32c5f235a7bdc2a" });
+    const auth = getAuth(app);
+    window.handleSignOut = async () => { try { await signOut(auth); } catch(e) {} window.location.href = 'index.html'; };
+        onAuthStateChanged(auth, async u => {
+        if (!u) { window.location.href = 'login.html'; return; }
+        // FIX B: Store user so loadSignals can get token
+        window._signalsUser = u;
+        const n = u.displayName || u.email.split('@')[0];
+        document.getElementById('userName').textContent = n;
+        document.getElementById('userAvatar').textContent = n.charAt(0).toUpperCase();
+
+        // FIX 3: Check maintenance/suspend on load
+        try {
+            const tok = await u.getIdToken();
+            const sj = await fetch('/api/user/status', { headers: { 'Authorization': 'Bearer ' + tok } }).then(r => r.json());
+            if (sj.success) {
+                if (sj.status.suspended) { window.location.href = 'login.html?suspended=1'; return; }
+                if (sj.status.maintenance) { document.body.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0a0e1a;flex-direction:column;gap:16px;font-family:Space Grotesk,sans-serif;text-align:center;padding:24px"><div style="font-size:3rem">🔧</div><div style="font-size:1.8rem;font-weight:700;color:#f0f0f0">Under Maintenance</div><div style="color:#6b7280;font-size:.95rem;max-width:400px;margin-top:8px">' + (sj.status.maintenanceMsg || 'We are making improvements.') + '</div></div>'; return; }
+            }
+        } catch(_) {}
+
+        // FIX B: Trigger load after auth is confirmed
+        if (typeof loadSignals === 'function') loadSignals();
+
+        // Auto-refresh signals every 60s (no WebSocket on this page)
+        setInterval(() => { if (typeof loadSignals === 'function') loadSignals(); }, 60000);
+
+        // FIX 3: Poll every 30s for maintenance/suspend changes
+        setInterval(async () => {
+            try {
+                const tok = await u.getIdToken();
+                const j = await fetch('/api/user/status', { headers: { 'Authorization': 'Bearer ' + tok } }).then(r => r.json());
+                if (j.success && (j.status.maintenance || j.status.suspended)) window.location.reload();
+            } catch(_) {}
+        }, 30000);
+    });
+    document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth).then(() => window.location.href = 'index.html'));
+    const _slo = document.getElementById('sidebarLogout');
+    if (_slo) _slo.addEventListener('click', () => signOut(auth).then(() => window.location.href = 'index.html'));
+</script>
+
+<script>
+    const _authHamburger = document.getElementById('authHamburger');
+    const _authNavMenu = document.getElementById('authNavMenu');
+    const _navBackdrop = document.getElementById('navBackdrop');
+    
+    function closeNavMenu() {
+        if (_authNavMenu) _authNavMenu.classList.remove('open'); if(document.getElementById('navBackdrop')) document.getElementById('navBackdrop').style.pointerEvents='none'; if(_navBackdrop) _navBackdrop.style.pointerEvents='none';
+        if (_navBackdrop) _navBackdrop.classList.remove('open');
+    }
+    
+    if (_authHamburger) {
+        _authHamburger.addEventListener('click', () => {
+            const isOpen = _authNavMenu.classList.toggle('open');
+        if(_navBackdrop) _navBackdrop.style.pointerEvents = _authNavMenu.classList.contains('open') ? 'auto' : 'none';
+            if (_navBackdrop) _navBackdrop.classList.toggle('open', isOpen);
+        });
+    }
+    if (_navBackdrop) {
+        _navBackdrop.addEventListener('click', closeNavMenu);
+    }
+    document.querySelectorAll('.auth-nav-link').forEach(link => {
+        link.addEventListener('click', closeNavMenu);
+    });
+
+    let signalData = [];
+    let currentFilter = 'all';
+
+    async function loadSignals() {
+        try {
+            // FIX B: Include auth token — /api/signals requires authentication
+            const headers = {};
+            if (window._signalsUser) {
+                try { headers['Authorization'] = 'Bearer ' + await window._signalsUser.getIdToken(); } catch(_) {}
+            }
+            const res = await fetch('/api/signals', { headers });
+            if (res.ok) {
+                const data = await res.json();
+                signalData = (data.signals || []).map(s => ({
+                    id: s._id,
+                    pair: s.pair,
+                    dir: s.direction,
+                    lev: s.leverage || '—',
+                    entry: s.entry,
+                    tp1: s.tp1,
+                    tp2: s.tp2 || '—',
+                    sl: s.sl,
+                    score: s.score || 0,
+                    status: (s.status === 'TP1_HIT' || s.status === 'TP2_HIT') ? 'tp' : 'active',
+                    statusLbl: s.status === 'TP1_HIT' ? 'TP1 Hit' : s.status === 'TP2_HIT' ? 'TP2 Hit' : s.status === 'OPEN' ? 'Active' : (s.status || 'Active'),
+                    rr: s.rr || '—',
+                    time: s.createdAt ? new Date(s.createdAt).toLocaleTimeString() : '—',
+                    note: s.note || ''
+                }));
+            }
+        } catch(e) {
+            signalData = [];
+        }
+        renderSignals(currentFilter);
+    }
+
+    function getScoreColor(s) {
+        if (s >= 85) return 'var(--green)';
+        if (s >= 70) return 'var(--gold)';
+        return 'var(--text-muted)';
+    }
+
+    function renderSignals(filter) {
+        const grid = document.getElementById('signalsGrid');
+        const empty= document.getElementById('emptyState');
+        const filtered = signalData.filter(s => {
+            if (filter === 'all')   return true;
+            if (filter === 'long')  return s.dir === 'LONG';
+            if (filter === 'short') return s.dir === 'SHORT';
+            if (filter === 'active')return s.status === 'active' || s.status === 'Active';
+            if (filter === 'tp')    return s.status === 'tp';
+            if (filter === 'high')  return s.score >= 80;
+            return true;
+        });
+
+        document.getElementById('totalCount').textContent  = signalData.length;
+        document.getElementById('longCount').textContent   = signalData.filter(s=>s.dir==='LONG').length;
+        document.getElementById('shortCount').textContent  = signalData.filter(s=>s.dir==='SHORT').length;
+        document.getElementById('activeCount').textContent = signalData.filter(s=>s.status==='active').length;
+
+        if (filtered.length === 0) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
+        empty.style.display = 'none';
+
+        grid.innerHTML = filtered.map(s => {
+            const isLong = s.dir === 'LONG';
+            const sc = getScoreColor(s.score);
+            const stClass = s.status === 'tp' ? 'badge-gold' : s.status === 'active' ? 'badge-blue' : 'badge-red';
+            return `
+            <div class="sig-card-full sig-${s.dir.toLowerCase()}">
+                <div class="scf-head">
+                    <div>
+                        <div class="scf-pair">${s.pair}</div>
+                        <div class="scf-meta">${s.time} · ${s.lev} leverage</div>
+                    </div>
+                    <div class="scf-badges">
+                        <span class="badge badge-${isLong ? 'green' : 'red'}">${s.dir}</span>
+                        <span class="badge ${stClass}">${s.statusLbl}</span>
+                    </div>
+                </div>
+                <div class="scf-prices">
+                    <div class="price-cell"><div class="pc-lbl">Entry</div><div class="pc-val text-gold">$${s.entry}</div></div>
+                    <div class="price-cell"><div class="pc-lbl">TP1</div><div class="pc-val" style="color:var(--green)">$${s.tp1}</div></div>
+                    <div class="price-cell"><div class="pc-lbl">SL</div><div class="pc-val" style="color:var(--red)">$${s.sl}</div></div>
+                </div>
+                <div class="scf-score">
+                    <span style="font-size:0.7rem;color:var(--text-muted);min-width:44px;">Score</span>
+                    <div class="score-track"><div class="score-fill" style="width:${s.score}%;background:${sc};"></div></div>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:${sc};min-width:36px;">${s.score}/100</span>
+                </div>
+                <div class="scf-footer">
+                    <span style="color:var(--text-muted);">${s.note}</span>
+                    <span class="mono" style="color:var(--text-muted);font-size:0.75rem;">R:R ${s.rr}×</span>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    window.filterSig = function(filter, el) {
+        document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+        currentFilter = filter;
+        renderSignals(filter);
+    };
+
+    // FIX B: loadSignals() is now called from onAuthStateChanged after token is ready
+    // Do NOT call it here directly — it would run without a token and get 401
+
+        /* ── User dropdown ── */
+        const _chip  = document.getElementById('userChipBtn');
+        const _ddrop = document.getElementById('userDropdown');
+        if (_chip && _ddrop) {
+            _chip.addEventListener('click', e => { e.stopPropagation(); _ddrop.classList.toggle('open'); });
+            document.addEventListener('click', () => _ddrop.classList.remove('open'));
+        }
+        const _dlogout = document.getElementById('dropdownLogout');
+        if (_dlogout) _dlogout.addEventListener('click', async () => {
+            if (typeof window.handleSignOut === 'function') await window.handleSignOut();
+            else window.location.href = 'index.html';
+        });
+</script>
+<!-- Cookie Consent Banner -->
+<div id="cookieBanner" style="position:fixed; bottom:20px; left:20px; right:20px; background:var(--bg2); border:1px solid var(--border); padding:16px; border-radius:12px; z-index:9999; display:none; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; box-shadow:var(--shadow);">
+    <span style="font-size:0.85rem; color:var(--text-muted);">We use cookies to personalize ads and analyze our traffic in accordance with our <a href="privacy.html" style="color:var(--gold); text-decoration:underline;">Privacy Policy</a>.</span>
+    <button onclick="acceptCookies()" class="btn btn-gold btn-sm">Accept Cookies</button>
+</div>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        if (!localStorage.getItem('cookiesAccepted')) {
+            document.getElementById('cookieBanner').style.display = 'flex';
+        }
+    });
+    function acceptCookies() {
+        localStorage.setItem('cookiesAccepted', 'true');
+        document.getElementById('cookieBanner').style.display = 'none';
+    }
+</script>
+</body>
+</html>

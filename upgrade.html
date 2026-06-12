@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Upgrade Plan | InvestySignals</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.upgrade-container { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+.upgrade-hero { text-align: center; padding: 40px 0 32px; }
+.upgrade-hero h1 { font-size: 2rem; font-weight: 800; margin-bottom: 10px; }
+.upgrade-hero p { color: var(--text-muted); font-size: 1rem; max-width: 480px; margin: 0 auto; }
+.plan-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 40px; }
+@media(max-width:600px){ .plan-cards { grid-template-columns: 1fr; } }
+.plan-card { background: var(--bg2); border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 28px 22px; position: relative; }
+.plan-card.featured { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+.plan-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #000; font-size: 0.7rem; font-weight: 700; padding: 3px 12px; border-radius: 20px; white-space: nowrap; }
+.plan-name { font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
+.plan-price { font-size: 2rem; font-weight: 800; color: var(--gold); margin: 12px 0 4px; }
+.plan-price span { font-size: 0.9rem; font-weight: 400; color: var(--text-muted); }
+.plan-features { list-style: none; padding: 0; margin: 16px 0 24px; display: flex; flex-direction: column; gap: 8px; }
+.plan-features li { font-size: 0.875rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+.plan-features li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+.plan-features li.no::before { content: '✗'; color: var(--red,#ff4d4f); }
+.contact-panel { background: var(--bg2); border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 32px 24px; }
+.contact-panel h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; }
+.contact-panel p { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 24px; }
+.contact-methods { display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px; }
+.contact-method { display: flex; align-items: center; gap: 14px; background: var(--surface); border-radius: var(--radius-sm); padding: 14px 16px; text-decoration: none; color: var(--text); border: 1px solid var(--border-soft); transition: border-color 0.2s; }
+.contact-method:hover { border-color: var(--gold); }
+.contact-method-icon { font-size: 1.5rem; flex-shrink: 0; }
+.contact-method-label { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 2px; }
+.contact-method-value { font-size: 0.9rem; font-weight: 600; }
+.divider { height: 1px; background: var(--border-soft); margin: 24px 0; }
+.request-form { display: flex; flex-direction: column; gap: 14px; }
+.request-form textarea { min-height: 100px; resize: vertical; }
+.current-plan-banner { background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius-sm); padding: 12px 16px; display: flex; align-items: center; gap: 10px; margin-bottom: 28px; font-size: 0.875rem; }
+</style>
+</head>
+<body>
+<nav class="auth-nav">
+    <a href="dashboard.html" class="nav-logo">
+        <div class="logo-icon">IS</div>
+        <span>INVESTY<span class="logo-accent">SIGNALS</span></span>
+    </a>
+    <div class="auth-nav-menu" id="authNavMenu">
+        <a href="dashboard.html" class="auth-nav-link">📊 Dashboard</a>
+        <a href="signals.html" class="auth-nav-link">⚡ Signals</a>
+        <a href="analysis.html" class="auth-nav-link">🧠 Analysis</a>
+        <a href="live-signals.html" class="auth-nav-link">📝 Paper Trading</a>
+        <a href="profile.html" class="auth-nav-link">👤 Profile</a>
+        <a class="auth-nav-link" style="color:var(--red,#ff4d4f);cursor:pointer;" id="sidebarLogout">🔓 Log Out</a>
+    </div>
+    <div class="auth-nav-right">
+        <div class="user-chip-wrap" id="userChipWrap">
+            <div class="user-chip" id="userChipBtn" style="cursor:pointer;display:flex;">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <div class="user-name" id="userName" style="display:block;">User</div>
+                <span style="font-size:0.65rem;color:var(--text-muted);margin-left:2px;">▾</span>
+            </div>
+            <div class="user-dropdown" id="userDropdown">
+                <a href="profile.html" class="ud-item">👤 Profile</a>
+                <div style="height:1px;background:var(--border-soft);margin:4px 0;"></div>
+                <a class="ud-item ud-danger" id="dropdownLogout">🔓 Log Out</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="upgrade-container">
+    <div class="upgrade-hero">
+        <div style="font-size:2.5rem;margin-bottom:12px;">⬆️</div>
+        <h1>Upgrade Your Plan</h1>
+        <p>Get access to premium signals and advanced features. Contact us to upgrade your account.</p>
+    </div>
+
+    <div class="current-plan-banner" id="currentPlanBanner">
+        <span style="font-size:1.1rem;">📊</span>
+        <span>Current Plan: <strong id="currentPlanLabel">Free</strong></span>
+    </div>
+
+    <div class="plan-cards">
+        <div class="plan-card">
+            <div class="plan-name">🟢 Free</div>
+            <div class="plan-price">$0 <span>/ month</span></div>
+            <ul class="plan-features">
+                <li>Free tier signals</li>
+                <li>Paper trading</li>
+                <li>Basic market data</li>
+                <li class="no">Pro signals</li>
+                <li class="no">Elite signals</li>
+                <li class="no">Priority support</li>
+            </ul>
+            <div id="freePlanBtn"></div>
+        </div>
+        <div class="plan-card featured">
+            <div class="plan-badge">⭐ Most Popular</div>
+            <div class="plan-name">🥇 Pro</div>
+            <div class="plan-price">Contact <span>for pricing</span></div>
+            <ul class="plan-features">
+                <li>All Free features</li>
+                <li>Pro-tier signals</li>
+                <li>Advanced analysis</li>
+                <li>Early signal access</li>
+                <li class="no">Elite signals</li>
+                <li class="no">VIP support</li>
+            </ul>
+            <button class="btn btn-gold" style="width:100%;" onclick="document.getElementById('contactPanel').scrollIntoView({behavior:'smooth'})">
+                Contact to Upgrade →
+            </button>
+        </div>
+    </div>
+
+    <div class="contact-panel" id="contactPanel">
+        <h2>📬 Contact Us to Upgrade</h2>
+        <p>Send us a message and we'll upgrade your account manually within 24 hours after payment confirmation.</p>
+
+        <div class="contact-methods">
+            <a class="contact-method" href="https://t.me/InvestySignals" target="_blank" rel="noopener">
+                <div class="contact-method-icon">💬</div>
+                <div>
+                    <div class="contact-method-label">Fastest Response</div>
+                    <div class="contact-method-value">Telegram — @InvestySignals</div>
+                </div>
+            </a>
+            <a class="contact-method" href="mailto:cdilrukshi52@gmail.com">
+                <div class="contact-method-icon">📧</div>
+                <div>
+                    <div class="contact-method-label">Email</div>
+                    <div class="contact-method-value">cdilrukshi52@gmail.com</div>
+                </div>
+            </a>
+        </div>
+
+        <div class="divider"></div>
+
+        <div style="font-weight:600;margin-bottom:14px;font-size:0.95rem;">✉️ Or Send a Request</div>
+        <div class="request-form">
+            <div class="input-group" style="margin-bottom:0;">
+                <label>Your Name</label>
+                <input type="text" class="input-control" id="reqName" placeholder="Your name">
+            </div>
+            <div class="input-group" style="margin-bottom:0;">
+                <label>Your Email</label>
+                <input type="email" class="input-control" id="reqEmail" placeholder="your@email.com">
+            </div>
+            <div class="input-group" style="margin-bottom:0;">
+                <label>Plan You Want</label>
+                <select class="input-control" id="reqPlan">
+                    <option value="pro">Pro Plan</option>
+                    <option value="elite">Elite Plan</option>
+                </select>
+            </div>
+            <div class="input-group" style="margin-bottom:0;">
+                <label>Message (optional)</label>
+                <textarea class="input-control request-form textarea" id="reqMsg" placeholder="Any questions or additional info..."></textarea>
+            </div>
+            <button class="btn btn-gold" id="sendReqBtn" onclick="sendUpgradeRequest()">Send Upgrade Request</button>
+            <div id="reqStatus" style="font-size:0.85rem;color:var(--green);display:none;"></div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+const app  = initializeApp({ apiKey:"AIzaSyA49TYbX5omoN56bffDnlqZGGjjpKZtOvk", authDomain:"investysignals-890ba.firebaseapp.com", projectId:"investysignals-890ba", storageBucket:"investysignals-890ba.firebasestorage.app", messagingSenderId:"1045281522975", appId:"1:1045281522975:web:47c4b8d32c5f235a7bdc2a" });
+const auth = getAuth(app);
+window.handleSignOut = async () => { try { await signOut(auth); } catch(e){} window.location.href='index.html'; };
+
+onAuthStateChanged(auth, async u => {
+    if (!u) { window.location.href = 'login.html'; return; }
+    const name = u.displayName || u.email?.split('@')[0] || 'User';
+    const ini  = name.charAt(0).toUpperCase();
+    const av = document.getElementById('userAvatar'); if(av) av.textContent = ini;
+    const un = document.getElementById('userName');   if(un) un.textContent = name;
+
+    // Pre-fill form
+    const nm = document.getElementById('reqName');    if(nm && !nm.value) nm.value = u.displayName || '';
+    const em = document.getElementById('reqEmail');   if(em && !em.value) em.value = u.email || '';
+
+    // Show current plan
+    try {
+        const tok = await u.getIdToken();
+        const sj  = await fetch('/api/user/status', { headers: { 'Authorization': 'Bearer ' + tok } }).then(r=>r.json());
+        if (sj.success) {
+            const pl = sj.status.plan || 'free';
+            const lbl = document.getElementById('currentPlanLabel');
+            if (lbl) lbl.textContent = pl.charAt(0).toUpperCase() + pl.slice(1);
+        }
+    } catch(_) {}
+
+    // Logout listeners
+    const slo = document.getElementById('sidebarLogout');
+    if (slo) slo.addEventListener('click', () => window.handleSignOut());
+    const dlo = document.getElementById('dropdownLogout');
+    if (dlo) dlo.addEventListener('click', () => window.handleSignOut());
+
+    // Dropdown toggle
+    const chip  = document.getElementById('userChipBtn');
+    const ddrop = document.getElementById('userDropdown');
+    if (chip && ddrop) {
+        chip.addEventListener('click', e => { e.stopPropagation(); ddrop.classList.toggle('open'); });
+        document.addEventListener('click', () => ddrop.classList.remove('open'));
+    }
+
+    // Nav hamburger
+    const ham = document.getElementById('authHamburger');
+    const menu = document.getElementById('authNavMenu');
+    if (ham && menu) ham.addEventListener('click', () => menu.classList.toggle('open'));
+});
+
+window.sendUpgradeRequest = async function() {
+    const name  = document.getElementById('reqName')?.value.trim();
+    const email = document.getElementById('reqEmail')?.value.trim();
+    const plan  = document.getElementById('reqPlan')?.value;
+    const msg   = document.getElementById('reqMsg')?.value.trim();
+    const status= document.getElementById('reqStatus');
+    const btn   = document.getElementById('sendReqBtn');
+
+    if (!name || !email) { alert('Please fill in your name and email.'); return; }
+
+    btn.textContent = 'Sending...'; btn.disabled = true;
+    try {
+        const r = await fetch('/api/reports', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                category: 'other',
+                message: `UPGRADE REQUEST\nName: ${name}\nEmail: ${email}\nPlan: ${plan}\n\n${msg || '(no message)'}`,
+                context: 'upgrade-page'
+            })
+        });
+        const j = await r.json();
+        if (j.success) {
+            status.textContent = '✅ Request sent! We will contact you within 24 hours.';
+            status.style.display = 'block';
+            btn.textContent = '✅ Sent';
+        } else {
+            throw new Error(j.error || 'Failed');
+        }
+    } catch(e) {
+        btn.textContent = 'Send Upgrade Request'; btn.disabled = false;
+        alert('❌ Failed to send: ' + e.message);
+    }
+};
+</script>
+</body>
+</html>
