@@ -1,0 +1,35 @@
+name: TP/SL Background Engine
+
+# Runs every 5 minutes (GitHub Actions free plan minimum interval)
+# This replaces the  setInterval(runTPSLCheck, 30000)  that ran on VPS
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'   # every 5 minutes
+  workflow_dispatch:          # allow manual trigger from GitHub UI
+
+jobs:
+  tpsl-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+
+    steps:
+      - name: Trigger TP/SL Check
+        run: |
+          echo "Calling TP/SL check on Vercel..."
+          RESPONSE=$(curl -s -o /tmp/response.txt -w "%{http_code}" \
+            -X POST "${{ secrets.VERCEL_APP_URL }}/api/cron/tpsl-check" \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --max-time 30)
+
+          echo "HTTP Status: $RESPONSE"
+          cat /tmp/response.txt
+          echo ""
+
+          if [ "$RESPONSE" != "200" ]; then
+            echo "ERROR: TP/SL check failed with status $RESPONSE"
+            exit 1
+          fi
+
+          echo "✅ TP/SL check completed successfully"
