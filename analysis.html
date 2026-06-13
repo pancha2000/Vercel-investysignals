@@ -285,8 +285,6 @@
 .adv-row{display:flex;align-items:center;gap:8px;padding:3px 0;flex-wrap:wrap;}
 .adv-label{min-width:100px;color:var(--text-dim);font-size:.72rem;}
 .adv-val{font-size:.75rem;font-weight:600;}
-            text-decoration: line-through;
-        }
         .pt-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
         .pt-row.single { grid-template-columns: 1fr; }
         .pt-field label {
@@ -1754,4 +1752,6 @@ function ptHideBalModal() {
 }
 
 async function ptSetCustomBalance() {
-    const inp = document.getElementById('ptCustomBal'
+    const inp = document.getElementById('ptCustomBal');
+    if (!inp) return;
+    const val = parseFloat(i
