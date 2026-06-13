@@ -17,11 +17,5 @@
   ],
   "env": {
     "VERCEL": "1"
-  },
-  "crons": [
-    {
-      "path": "/api/cron/tpsl-check",
-      "schedule": "*/1 * * * *"
-    }
-  ]
+  }
 }
