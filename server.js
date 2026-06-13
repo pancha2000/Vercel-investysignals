@@ -53,6 +53,7 @@ const Settings     = require('./models/Settings');
 const Announcement = require('./models/Announcement');
 const Report          = require('./models/Report');
 const BalanceRequest  = require('./models/BalanceRequest');
+const Event           = require('./models/Event');
 
 // ── Firebase ─────────────────────────────────────────────────
 try {
@@ -2231,7 +2232,11 @@ const clients = new Map(); // uid -> Set of ws connections
 let wss = null;
 
 function broadcastToAll(data) {
-  if (!wss) return; // no-op on Vercel (no persistent WebSocket)
+  if (!wss) {
+    // Vercel: persist event to MongoDB → clients poll /api/events
+    try { Event.create({ data, uid: null }).catch(() => {}); } catch (_) {}
+    return;
+  }
   const msg = JSON.stringify(data);
   wss.clients.forEach(ws => {
     if (ws.readyState === WebSocket.OPEN) ws.send(msg);
@@ -2239,7 +2244,10 @@ function broadcastToAll(data) {
 }
 
 function broadcastToUser(uid, data) {
-  if (!wss) return; // no-op on Vercel
+  if (!wss) {
+    try { Event.create({ data, uid }).catch(() => {}); } catch (_) {}
+    return;
+  }
   const msg = JSON.stringify(data);
   const userClients = clients.get(uid);
   if (!userClients) return;
@@ -2393,6 +2401,52 @@ async function runTPSLCheck() {
   } catch(e) { console.error('runTPSLCheck error:', e.message); }
   finally { _tpslRunning = false; } // always release lock
 }
+
+// ── Polling endpoints (WebSocket polyfill for Vercel) ────────
+
+// Ticker symbols for live prices
+const TICKER_SYMS = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT'];
+let _tickerCache = { data: null, ts: 0 };
+
+// GET /api/market/prices — live prices (used by ws-polyfill.js every 5s)
+app.get('/api/market/prices', async (req, res) => {
+  try {
+    if (_tickerCache.data && Date.now() - _tickerCache.ts < 5000) {
+      return res.json(_tickerCache.data);
+    }
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 6000);
+    const r = await fetch('https://api.binance.com/api/v3/ticker/24hr', { signal: ctrl.signal });
+    if (!r.ok) throw new Error('Binance error');
+    const all = await r.json();
+    const ticker = all
+      .filter(c => TICKER_SYMS.includes(c.symbol))
+      .map(c => ({ symbol: c.symbol, price: parseFloat(c.lastPrice), change: parseFloat(c.priceChangePercent) }));
+    const response = { type: 'market_update', ticker };
+    _tickerCache = { data: response, ts: Date.now() };
+    res.json(response);
+  } catch (e) {
+    res.json({ type: 'market_update', ticker: [] });
+  }
+});
+
+// GET /api/events — event queue for ws-polyfill.js (replaces WebSocket push)
+// Optional auth: no token = public events only; with token = public + user events
+app.get('/api/events', async (req, res) => {
+  try {
+    const since = req.query.since ? new Date(parseInt(req.query.since)) : new Date(Date.now() - 10000);
+    let uid = null;
+    const token = (req.headers.authorization || '').replace('Bearer ', '');
+    if (token) {
+      try { const d = await admin.auth().verifyIdToken(token); uid = d.uid; } catch (_) {}
+    }
+    const query = { ts: { $gt: since }, $or: [{ uid: null }, ...(uid ? [{ uid }] : [])] };
+    const events = await Event.find(query).sort({ ts: 1 }).limit(100).lean();
+    res.json({ events: events.map(e => e.data), ts: Date.now() });
+  } catch (e) {
+    res.json({ events: [], ts: Date.now() });
+  }
+});
 
 // ── Cron endpoint — triggered by Vercel Cron or any external scheduler ──
 app.post('/api/cron/tpsl-check', async (req, res) => {
