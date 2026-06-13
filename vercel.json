@@ -5,7 +5,21 @@
       "src": "server.js",
       "use": "@vercel/node",
       "config": {
-        "maxDuration": 60
+        "maxDuration": 60,
+        "includeFiles": [
+          "*.html",
+          "*.css",
+          "*.js",
+          "*.txt",
+          "*.xml",
+          "*.png",
+          "*.ico",
+          "*.jpg",
+          "*.jpeg",
+          "*.svg",
+          "serviceAccount.json",
+          "models/**"
+        ]
       }
     }
   ],
