@@ -716,8 +716,7 @@ window.toggleLC = function(id) {
     const body = document.getElementById(id);
     if (!body) return;
     const isOpen = body.classList.toggle('open');
-    const head = body.previousElementSibling;
-    if (head) head.setAttribute('aria-expanded', isOpen);
+    // flip arrow if one exists next to this card
     const arr = document.getElementById('arr_' + id);
     if (arr) arr.textContent = isOpen ? '▾' : '▸';
 };
@@ -1070,9 +1069,9 @@ function renderFullAnalysis(data, container) {
         <div class="level-card" style="margin-bottom:8px;">
             <div class="level-card-head" onclick="toggleLC('snap_btc')">
                 <div class="level-title">📈 BTC + Market Context</div>
-                <div style="display:flex;gap:6px;">${signalPill(r.btcTrend?.includes('BULL')?'BTC Bull':'BTC Bear', r.btcTrend?.includes('BULL')?'bull':'bear')} <span id="arr_snap_btc" style="font-size:0.7rem;color:var(--text-dim);">▸</span></div>
+                <div style="display:flex;gap:6px;">${signalPill(r.btcTrend?.includes('BULL')?'BTC Bull':'BTC Bear', r.btcTrend?.includes('BULL')?'bull':'bear')} <span id="arr_snap_btc" style="font-size:0.7rem;color:var(--text-dim);">▼</span></div>
             </div>
-            <div class="level-card-body" id="snap_btc">
+            <div class="level-card-body open" id="snap_btc">
                 ${indRow('BTC 1D Trend', r.btcTrend, signalPill(r.btcTrend?.includes('STRONG_BULL')?'Strong Bull':r.btcTrend?.includes('BULL')?'Bull':r.btcTrend?.includes('STRONG_BEAR')?'Strong Bear':'Bear', r.btcTrend?.includes('BULL')?'bull':'bear'))}
                 ${indRow('Funding Rate', r.fundingRate!=null?(r.fundingRate>0?'+':'')+r.fundingRate.toFixed(4)+'%':'—', signalPill(r.fundingBias==='LONGS_PAYING'?'Longs Paying':r.fundingBias==='SHORTS_PAYING'?'Shorts Paying':'Neutral', r.fundingBias==='LONGS_PAYING'?'bear':r.fundingBias==='SHORTS_PAYING'?'bull':'neut'))}
                 ${indRow('Structure (1D)', '', structSignal(r.d1Struct))}
@@ -1083,9 +1082,9 @@ function renderFullAnalysis(data, container) {
         <div class="level-card" style="margin-bottom:8px;">
             <div class="level-card-head" onclick="toggleLC('snap_rsi')">
                 <div class="level-title">📉 RSI — All Timeframes</div>
-                <div style="display:flex;gap:6px;"><span id="arr_snap_rsi" style="font-size:0.7rem;color:var(--text-dim);">▸</span></div>
+                <div style="display:flex;gap:6px;"><span id="arr_snap_rsi" style="font-size:0.7rem;color:var(--text-dim);">▼</span></div>
             </div>
-            <div class="level-card-body" id="snap_rsi">
+            <div class="level-card-body open" id="snap_rsi">
                 ${indRow('RSI (15m)', r.m15RSI!=null?r.m15RSI.toFixed(1):'—', rsiSignal(r.m15RSI))}
                 ${indRow('RSI (1H)',  r.h1RSI!=null?r.h1RSI.toFixed(1):'—',  rsiSignal(r.h1RSI))}
                 ${indRow('RSI (4H)',  r.h4RSI!=null?r.h4RSI.toFixed(1):'—',  rsiSignal(r.h4RSI))}
@@ -1098,9 +1097,9 @@ function renderFullAnalysis(data, container) {
         <div class="level-card" style="margin-bottom:8px;">
             <div class="level-card-head" onclick="toggleLC('snap_macd')">
                 <div class="level-title">📈 MACD + Structure</div>
-                <div style="display:flex;gap:6px;"><span id="arr_snap_macd" style="font-size:0.7rem;color:var(--text-dim);">▸</span></div>
+                <div style="display:flex;gap:6px;"><span id="arr_snap_macd" style="font-size:0.7rem;color:var(--text-dim);">▼</span></div>
             </div>
-            <div class="level-card-body" id="snap_macd">
+            <div class="level-card-body open" id="snap_macd">
                 ${indRow('MACD (1H)', r.h1MACD?.histogram!=null?'Hist: '+(r.h1MACD.histogram>0?'+':'')+r.h1MACD.histogram.toFixed(4):'—', macdSignal(r.h1MACD?.histogram), r.h1MACD?.histogram!=null&&r.h1MACD?.prevHistogram!=null?(Math.abs(r.h1MACD.histogram)>Math.abs(r.h1MACD.prevHistogram)?'↑ Growing':'↓ Fading'):'')}
                 ${indRow('MACD (15m)', r.m15MACD?.histogram!=null?'Hist: '+(r.m15MACD.histogram>0?'+':'')+r.m15MACD.histogram.toFixed(4):'—', macdSignal(r.m15MACD?.histogram))}
                 ${indRow('Structure (4H)', '', structSignal(r.h4Struct))}
@@ -1115,9 +1114,9 @@ function renderFullAnalysis(data, container) {
         <div class="level-card" style="margin-bottom:8px;">
             <div class="level-card-head" onclick="toggleLC('snap_ema')">
                 <div class="level-title">📊 EMA Position</div>
-                <div style="display:flex;gap:6px;"><span id="arr_snap_ema" style="font-size:0.7rem;color:var(--text-dim);">▸</span></div>
+                <div style="display:flex;gap:6px;"><span id="arr_snap_ema" style="font-size:0.7rem;color:var(--text-dim);">▼</span></div>
             </div>
-            <div class="level-card-body" id="snap_ema">
+            <div class="level-card-body open" id="snap_ema">
                 ${indRow('EMA (1H)', `20: $${r.h1Ema20?.toFixed(4)||'—'} / 50: $${r.h1Ema50?.toFixed(4)||'—'}`, emaSignal(p, r.h1Ema20, r.h1Ema50, r.h1Ema200))}
                 ${indRow('EMA 200 (1H)', r.h1Ema200?'$'+r.h1Ema200.toFixed(4):'—', signalPill(p&&r.h1Ema200?(p>r.h1Ema200?'Above 200':'Below 200'):'—', p&&r.h1Ema200?(p>r.h1Ema200?'bull':'bear'):'neut'))}
                 ${indRow('EMA (4H)', `20: $${r.h4Ema20?.toFixed(4)||'—'} / 50: $${r.h4Ema50?.toFixed(4)||'—'}`, emaSignal(p, r.h4Ema20, r.h4Ema50, r.h4Ema200))}
@@ -1128,9 +1127,9 @@ function renderFullAnalysis(data, container) {
         <div class="level-card" style="margin-bottom:8px;">
             <div class="level-card-head" onclick="toggleLC('snap_zones')">
                 <div class="level-title">🗺️ Key Zones + Volume</div>
-                <div style="display:flex;gap:6px;"><span id="arr_snap_zones" style="font-size:0.7rem;color:var(--text-dim);">▸</span></div>
+                <div style="display:flex;gap:6px;"><span id="arr_snap_zones" style="font-size:0.7rem;color:var(--text-dim);">▼</span></div>
             </div>
-            <div class="level-card-body" id="snap_zones">
+            <div class="level-card-body open" id="snap_zones">
                 ${indRow('S/R Levels (4H)', '', '')}
                 <div style="padding:4px 0 8px;flex-wrap:wrap;display:flex;gap:4px;">${srHtml(r.h4SR)}</div>
                 ${indRow('S/R Levels (1D)', '', '')}
@@ -1163,11 +1162,11 @@ function renderFullAnalysis(data, container) {
 
     // ── AI Level Cards ──
     function levelCard(icon, title, badge, badgeClass, fields, open=false) {
-        const id   = 'lc_' + Math.random().toString(36).slice(2,7);
-        const rows = fields.map(([lbl,val]) => `<div class="data-row"><span class="data-lbl">${lbl}</span><span class="data-val">${val||'—'}</span></div>`).join('');
+        const id     = 'lc_' + Math.random().toString(36).slice(2,7);
         const isOpen = open !== false; // default open
+        const rows = fields.map(([lbl,val]) => `<div class="data-row"><span class="data-lbl">${lbl}</span><span class="data-val">${val||'—'}</span></div>`).join('');
         return `<div class="level-card">
-            <div class="level-card-head" onclick="toggleLC('${id}')" role="button" aria-expanded="${isOpen}" style="cursor:pointer;-webkit-tap-highlight-color:rgba(0,0,0,0.1);">
+            <div class="level-card-head" onclick="toggleLC('${id}')" role="button" aria-expanded="${isOpen}">
                 <div class="level-title">${icon} <span>${title}</span></div>
                 <div style="display:flex;align-items:center;gap:6px;">
                     <span class="level-badge ${badgeClass}">${badge}</span>
@@ -1543,6 +1542,41 @@ function buildWatchZonePanel(data) {
     <div id="ptTradesList"></div>
 </div>
 
+<!-- Balance modal (shared) -->
+<div class="pt-modal-overlay" id="ptBalModal" style="display:none;" onclick="if(event.target===this)ptHideBalModal()">
+    <div class="pt-modal">
+        <h3>⚙️ Paper Balance</h3>
+        <div id="ptFirstTimeSection">
+            <p style="font-size:0.8rem;color:var(--text-muted);">ඔබේ paper trading balance set කරන්න. <strong>එකවරක් විතරයි</strong> ඔබට directly set කරන්න පුළුවන්.</p>
+            <div class="pt-field" style="margin-bottom:10px;">
+                <label>Starting Balance (100 – 1,000,000 USDT)</label>
+                <input type="number" id="ptCustomBal" min="100" max="1000000" placeholder="e.g. 10000" style="width:100%;background:var(--surface);border:1px solid var(--border-soft);color:var(--text);padding:9px 12px;border-radius:var(--radius-xs);font-family:'JetBrains Mono',monospace;font-size:0.85rem;outline:none;box-sizing:border-box;">
+            </div>
+            <div class="pt-modal-actions">
+                <button onclick="ptSetCustomBalance()" style="background:rgba(0,217,126,0.12);border:1px solid rgba(0,217,126,0.3);color:var(--green);">✅ Set Balance</button>
+            </div>
+            <hr style="border-color:var(--border-soft);margin:14px 0 10px;">
+        </div>
+        <div id="ptAdminSection">
+            <p style="font-size:0.8rem;color:var(--text-muted);" id="ptAdminLabel">Balance reset කරන්න admin request කරන්න:</p>
+            <div class="pt-field" style="margin-bottom:8px;">
+                <label>Amount (USDT)</label>
+                <input type="number" id="ptReqAmount" min="100" max="1000000" placeholder="e.g. 10000" style="width:100%;background:var(--surface);border:1px solid var(--border-soft);color:var(--text);padding:9px 12px;border-radius:var(--radius-xs);font-family:'JetBrains Mono',monospace;font-size:0.85rem;outline:none;box-sizing:border-box;">
+            </div>
+            <div class="pt-field" style="margin-bottom:10px;">
+                <label>Reason <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+                <input type="text" id="ptReqReason" placeholder="e.g. strategy test" style="width:100%;background:var(--surface);border:1px solid var(--border-soft);color:var(--text);padding:9px 12px;border-radius:var(--radius-xs);font-family:'JetBrains Mono',monospace;font-size:0.82rem;outline:none;box-sizing:border-box;">
+            </div>
+            <div class="pt-modal-actions">
+                <button onclick="ptRequestReset()" style="background:var(--surface);border:1px solid var(--border-soft);color:var(--text-muted);">📩 Request Admin Reset</button>
+            </div>
+        </div>
+        <div id="ptBalMsg"></div>
+        <div class="pt-modal-actions" style="margin-top:6px;">
+            <button onclick="ptHideBalModal()" style="background:transparent;border:1px solid var(--border-soft);color:var(--text-muted);">Close</button>
+        </div>
+    </div>
+</div>
     `;
 }
 
@@ -1753,5 +1787,67 @@ function ptHideBalModal() {
 
 async function ptSetCustomBalance() {
     const inp = document.getElementById('ptCustomBal');
-    if (!inp) return;
-    const val = parseFloat(i
+    const val = parseFloat(inp?.value);
+    if (isNaN(val) || val < 100 || val > 1000000) {
+        ptShowBalMsg('100 – 1,000,000 USDT range enter කරන්න.', true);
+        return;
+    }
+    const tok = await getToken();
+    if (!tok) return;
+    const btn = document.querySelector('#ptFirstTimeSection .pt-modal-actions button');
+    if (btn) { btn.disabled = true; btn.textContent = 'Setting...'; }
+    try {
+        const r = await fetch('/api/paper/balance/set', {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json', Authorization:'Bearer '+tok },
+            body: JSON.stringify({ amount: val })
+        });
+        const d = await r.json();
+        if (d.success) {
+            ptShowBalMsg(`Balance set: $${parseFloat(d.balance).toFixed(2)}`);
+            const ft = document.getElementById('ptFirstTimeSection');
+            if (ft) ft.style.display = 'none';
+            await ptLoadBalance();
+        } else {
+            ptShowBalMsg(d.error || 'Balance set failed.', true);
+        }
+    } catch(e) { ptShowBalMsg('Network error.', true); }
+    if (btn) { btn.disabled = false; btn.textContent = '✅ Set Balance'; }
+}
+
+async function ptRequestReset() {
+    const amt    = parseFloat(document.getElementById('ptReqAmount')?.value);
+    const reason = (document.getElementById('ptReqReason')?.value || '').trim();
+    if (isNaN(amt) || amt < 100 || amt > 1000000) {
+        ptShowBalMsg('100 – 1,000,000 USDT range enter කරන්න.', true);
+        return;
+    }
+    const tok = await getToken();
+    if (!tok) return;
+    const btn = document.querySelector('#ptAdminSection .pt-modal-actions button');
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+    try {
+        const r = await fetch('/api/paper/balance/request', {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json', Authorization:'Bearer '+tok },
+            body: JSON.stringify({ amount: amt, reason })
+        });
+        const d = await r.json();
+        if (d.success) {
+            ptShowBalMsg('Request sent! Admin will review shortly.');
+        } else {
+            ptShowBalMsg(d.error || 'Request failed.', true);
+        }
+    } catch(e) { ptShowBalMsg('Network error.', true); }
+    if (btn) { btn.disabled = false; btn.textContent = '📩 Request Admin Reset'; }
+}
+
+function ptShowBalMsg(msg, isErr = false) {
+    const el = document.getElementById('ptBalMsg');
+    if (!el) return;
+    el.className = 'pt-msg ' + (isErr ? 'err' : 'ok');
+    el.textContent = msg;
+}
+</script>
+</body>
+</html>
